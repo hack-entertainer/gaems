@@ -13,7 +13,7 @@ map_width, map_height = 900, 600
 def main():
   # initialize surface and renderer
   SDL_Init(SDL_INIT_VIDEO)
-  window = SDL_CreateWindow(b"Hello World",
+  window = SDL_CreateWindow(b"Triangle Man",
                             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                             map_width, map_height, SDL_WINDOW_SHOWN)
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)
@@ -38,14 +38,28 @@ def main():
 
       selected = None
       if event.type == SDL_KEYDOWN:
-        if (event.key.keysym.sym == SDLK_UP):
-          mans.location.x -= 10
-        elif (event.key.keysym.sym == SDLK_DOWN):
-          mans.location.x += 10
-        elif (event.key.keysym.sym == SDLK_LEFT):
-          mans.location.y -= 10
-        elif (event.key.keysym.sym == SDLK_RIGHT):
-          mans.location.y += 10
+
+        if (event.key.keysym.sym == SDLK_u):
+          mans.location.x -=15
+          mans.location.y -=15
+        elif (event.key.keysym.sym == SDLK_i):
+          mans.location.y -=15
+        elif (event.key.keysym.sym == SDLK_o):
+          mans.location.x +=15
+          mans.location.y -=15
+        elif (event.key.keysym.sym == SDLK_l):
+          mans.location.x +=15
+        elif (event.key.keysym.sym == SDLK_PERIOD):
+          mans.location.x +=15
+          mans.location.y +=15
+        elif (event.key.keysym.sym == SDLK_COMMA):
+          mans.location.y +=15
+        elif (event.key.keysym.sym == SDLK_m):
+          mans.location.x -=15
+          mans.location.y +=15
+        elif (event.key.keysym.sym == SDLK_j):
+          mans.location.x -=15
+
       elif event.type == SDL_MOUSEBUTTONUP:
         # get position of click
         mouse_x, mouse_y = ctypes.c_int(), ctypes.c_int()
