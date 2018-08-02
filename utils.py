@@ -62,7 +62,7 @@ class Pen(object):
     surface = f_mngr.render(message)
     texture = SDL_CreateTextureFromSurface(renderer, surface)
 
-    recta = SDL_Rect(x=position.x, y=position.y, w=len(message) * round(height/2.8), h=height)
+    recta = SDL_Rect(x=position.x, y=position.y, w=len(message) * round(height / 2.8), h=height)
 
     SDL_RenderCopy(renderer, texture, recta, recta)
 

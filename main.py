@@ -41,32 +41,28 @@ def main():
       if event.type == SDL_KEYDOWN:
 
         # move mans
-        if (event.key.keysym.sym == SDLK_u):
-          mans.location.x -= 15
-          mans.location.y -= 15
-        elif (event.key.keysym.sym == SDLK_i):
-          mans.location.y -= 15
-        elif (event.key.keysym.sym == SDLK_o):
-          mans.location.x += 15
-          mans.location.y -= 15
-        elif (event.key.keysym.sym == SDLK_l):
-          mans.location.x += 15
-        elif (event.key.keysym.sym == SDLK_PERIOD):
-          mans.location.x += 15
-          mans.location.y += 15
-        elif (event.key.keysym.sym == SDLK_COMMA):
-          mans.location.y += 15
-        elif (event.key.keysym.sym == SDLK_m):
-          mans.location.x -= 15
-          mans.location.y += 15
-        elif (event.key.keysym.sym == SDLK_j):
-          mans.location.x -= 15
+        if (event.key.keysym.sym == SDLK_UP):
+          if mans.y_velo > -1:
+            mans.y_velo -= 1
+        elif (event.key.keysym.sym == SDLK_DOWN):
+          if mans.y_velo < 1:
+            mans.y_velo += 1
+        elif (event.key.keysym.sym == SDLK_LEFT):
+          if mans.x_velo > -1:
+            mans.x_velo -= 1
+        elif (event.key.keysym.sym == SDLK_RIGHT):
+          if mans.y_velo < 1:
+            mans.x_velo += 1
 
-        # "goals"
-
-        # #1: touch white square
-
-
+      elif event.type == SDL_KEYUP:
+        if (event.key.keysym.sym == SDLK_UP):
+          mans.y_velo += 1
+        elif (event.key.keysym.sym == SDLK_DOWN):
+          mans.y_velo -= 1
+        elif (event.key.keysym.sym == SDLK_LEFT):
+          mans.x_velo += 1
+        elif (event.key.keysym.sym == SDLK_RIGHT):
+          mans.x_velo -= 1
 
 
 
@@ -75,6 +71,14 @@ def main():
         mouse_x, mouse_y = ctypes.c_int(), ctypes.c_int()
         SDL_GetMouseState(mouse_x, mouse_y)
 
+    # movement
+    mans.location.x += mans.x_velo
+    mans.location.y += mans.y_velo
+
+    # "goals"
+
+    # #1: touch white square
+    
     # clear the screen
     SDL_SetRenderDrawColor(renderer, *BKGRND, SDL_ALPHA_OPAQUE)
     SDL_RenderClear(renderer)

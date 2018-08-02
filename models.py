@@ -33,7 +33,7 @@ class TriangleMan(GameObject):
 
   '''
 
-  def __init__(self, brush, size, color, location=None):
+  def __init__(self, brush, size, color, location=None, x_velo=0, y_velo=0, max_velo=0):
     """
     brush -- Brush()
     size -- int
@@ -41,6 +41,11 @@ class TriangleMan(GameObject):
     location -- Point()
     """
     super(TriangleMan, self).__init__(brush, size, color, location=location)
+
+    # for movement
+    self.x_velo = x_velo
+    self.y_velo = y_velo
+    self.max_velo = max_velo
 
     # define points, left, middle, right
     self.height = sqrt(size ** 2 - (size ** 2 / 4))
