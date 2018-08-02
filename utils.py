@@ -6,6 +6,15 @@ from sdl2 import *
 from sdl2 import ext
 
 
+class Point:
+  def __init__(self, x, y):
+    self.x = x
+    self.y = y
+
+  def __repr__(self):
+    return ''.join(['Point(', str(self.x), ',', str(self.y), ')'])
+
+
 class Brush(object):
   '''
   wrap the SDL objects and methods
@@ -43,17 +52,19 @@ class Pen(object):
   def __init__(self, renderer):
     self.renderer = renderer
 
-  def write(self):
+  def write(self, message, position=Point(0, 0), height=20):
     renderer = self.renderer
 
     fpath = path.join(os.path.abspath(os.path.dirname(__file__)), 'roboto/RobotoCondensed-Bold.ttf')
 
     f_mngr = ext.FontManager(fpath, 'roboto')
 
-    surface = f_mngr.render('Menu coming soon.')
+    surface = f_mngr.render(message)
     texture = SDL_CreateTextureFromSurface(renderer, surface)
-    recta, rectb = SDL_Rect(x=0, y=0, w=200, h=20), SDL_Rect(x=350, y=350, w=200, h=20)
-    SDL_RenderCopy(renderer, texture, recta, rectb)
+
+    recta = SDL_Rect(x=position.x, y=position.y, w=len(message) * round(height/2.8), h=height)
+
+    SDL_RenderCopy(renderer, texture, recta, recta)
 
 
 class Line(object):
@@ -63,12 +74,3 @@ class Line(object):
 
   def y_value(self, x):
     return self.slope * x + self.intercept
-
-
-class Point:
-  def __init__(self, x, y):
-    self.x = x
-    self.y = y
-
-  def __repr__(self):
-    return ''.join(['Point(', str(self.x), ',', str(self.y), ')'])
