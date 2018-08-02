@@ -4,7 +4,7 @@ import sys
 from sdl2 import *
 
 from colors import *
-from models import TriangleMan
+from models import TriangleMan, Square
 from utils import Brush, Pen, Point
 
 map_width, map_height = 900, 600
@@ -28,6 +28,8 @@ def main():
   # object
   mans = TriangleMan(brush, 15, HEATWAVE, location=Point(25, 25))
 
+  # game objects
+  goal_square = Square(brush, 5, PARADISE, location=Point(round(map_width * .75), round(map_height * .75)))
   BKGRND = NIGHTFALL
 
   while running:
@@ -36,29 +38,37 @@ def main():
         running = False
         break
 
-      selected = None
       if event.type == SDL_KEYDOWN:
 
+        # move mans
         if (event.key.keysym.sym == SDLK_u):
-          mans.location.x -=15
-          mans.location.y -=15
+          mans.location.x -= 15
+          mans.location.y -= 15
         elif (event.key.keysym.sym == SDLK_i):
-          mans.location.y -=15
+          mans.location.y -= 15
         elif (event.key.keysym.sym == SDLK_o):
-          mans.location.x +=15
-          mans.location.y -=15
+          mans.location.x += 15
+          mans.location.y -= 15
         elif (event.key.keysym.sym == SDLK_l):
-          mans.location.x +=15
+          mans.location.x += 15
         elif (event.key.keysym.sym == SDLK_PERIOD):
-          mans.location.x +=15
-          mans.location.y +=15
+          mans.location.x += 15
+          mans.location.y += 15
         elif (event.key.keysym.sym == SDLK_COMMA):
-          mans.location.y +=15
+          mans.location.y += 15
         elif (event.key.keysym.sym == SDLK_m):
-          mans.location.x -=15
-          mans.location.y +=15
+          mans.location.x -= 15
+          mans.location.y += 15
         elif (event.key.keysym.sym == SDLK_j):
-          mans.location.x -=15
+          mans.location.x -= 15
+
+        # "goals"
+
+        # #1: touch white square
+
+
+
+
 
       elif event.type == SDL_MOUSEBUTTONUP:
         # get position of click

@@ -6,6 +6,24 @@ class GameObject(object):
   '''
   repository for generic object attributes
   '''
+
+  def __init__(self, brush, size, color, location=None):
+    """
+    brush -- Brush()
+    size -- int
+    color -- RGB tuple good for sdl
+    location -- Point()
+    """
+    self.brush = brush
+    self.size = size
+    self.color = color
+    self.location = location
+
+
+class Square(GameObject):
+  '''
+  a square
+  '''
   pass
 
 
@@ -13,26 +31,19 @@ class TriangleMan(GameObject):
   '''
   a triangle-shaped man
 
-  brush -- Brush()
-  size -- int
-  color -- RGB tuple good for sdl
-  location -- Point()
   '''
 
   def __init__(self, brush, size, color, location=None):
-    '''
-
-    :param size: int size
-    :param location: Point() instance specifying center of triangle man
-    '''
-    self.brush = brush
-    self.size = size
-    self.color = color
-    self.location = location
+    """
+    brush -- Brush()
+    size -- int
+    color -- RGB tuple good for sdl
+    location -- Point()
+    """
+    super(TriangleMan, self).__init__(brush, size, color, location=location)
 
     # define points, left, middle, right
     self.height = sqrt(size ** 2 - (size ** 2 / 4))
-
     self.calc_points()
 
   def calc_points(self):
