@@ -7,7 +7,7 @@ from colors import *
 from models import TriangleMan, Square
 from utils import Brush, Pen, Point
 
-map_width, map_height = 900, 600
+map_width, map_height = 1200, 900
 
 
 def main():
@@ -41,30 +41,32 @@ def main():
       if event.type == SDL_KEYDOWN:
 
         # move mans
-        if (event.key.keysym.sym == SDLK_UP):
+        if event.key.keysym.sym == SDLK_UP:
           if mans.y_velo > -1:
             mans.y_velo -= 1
-        elif (event.key.keysym.sym == SDLK_DOWN):
+        elif event.key.keysym.sym == SDLK_DOWN:
           if mans.y_velo < 1:
             mans.y_velo += 1
-        elif (event.key.keysym.sym == SDLK_LEFT):
+        elif event.key.keysym.sym == SDLK_LEFT:
           if mans.x_velo > -1:
             mans.x_velo -= 1
-        elif (event.key.keysym.sym == SDLK_RIGHT):
-          if mans.y_velo < 1:
+        elif event.key.keysym.sym == SDLK_RIGHT:
+          if mans.x_velo < 1:
             mans.x_velo += 1
 
       elif event.type == SDL_KEYUP:
-        if (event.key.keysym.sym == SDLK_UP):
-          mans.y_velo += 1
-        elif (event.key.keysym.sym == SDLK_DOWN):
-          mans.y_velo -= 1
-        elif (event.key.keysym.sym == SDLK_LEFT):
-          mans.x_velo += 1
-        elif (event.key.keysym.sym == SDLK_RIGHT):
-          mans.x_velo -= 1
-
-
+        if event.key.keysym.sym == SDLK_UP:
+          if mans.y_velo < 0:
+            mans.y_velo += 1
+        elif event.key.keysym.sym == SDLK_DOWN:
+          if mans.y_velo > 0:
+            mans.y_velo -= 1
+        elif event.key.keysym.sym == SDLK_LEFT:
+          if mans.x_velo < 0:
+            mans.x_velo += 1
+        elif event.key.keysym.sym == SDLK_RIGHT:
+          if mans.x_velo > 0:
+            mans.x_velo -= 1
 
       elif event.type == SDL_MOUSEBUTTONUP:
         # get position of click
@@ -78,7 +80,7 @@ def main():
     # "goals"
 
     # #1: touch white square
-    
+
     # clear the screen
     SDL_SetRenderDrawColor(renderer, *BKGRND, SDL_ALPHA_OPAQUE)
     SDL_RenderClear(renderer)
