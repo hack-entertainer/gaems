@@ -74,3 +74,58 @@ class Line(object):
 
   def y_value(self, x):
     return self.slope * x + self.intercept
+
+
+class Geometry(object):
+  '''
+  geometry functions for polygons and kin
+  '''
+
+  @classmethod
+  def distance(cls, p1, p2):
+    pass
+
+
+class Game(object):
+  """
+  encompases (eventually) all assets and activities within a game such as collision detection, state management,
+  and win conditions
+  """
+
+  def win(self):
+    '''
+
+    :return: True if win
+    '''
+    raise Exception('not implemented')
+
+  def collision(self, o1, o2):
+    '''
+
+    :param o1: a game object
+    :param o2: another game object
+    :return: True if they collide
+    '''
+
+    # todo divide game into collision regions
+
+    # find horizontal overlap
+    left = o1.left
+    # o2's leftmost point is to the right of o1's
+    if o2.left.x > left.x:
+      left = o2.left
+
+    right = o1.right
+    # o2's rightmost point is to the left of o1's
+    if o2.right.x < o1.right.x:
+      right = o2.right
+
+    # scan from left->right of overlap and check if points overlap
+    for x in range(left.x, right.x + 1):
+      # o1 points @ x
+
+
+      # o2 point @ x
+      pass
+
+    raise Exception('not implemented')

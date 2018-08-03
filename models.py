@@ -42,6 +42,7 @@ class Square(GameObject):
     """
     super(Square, self).__init__(brush, size, color, location=location)
     self.calc_points()
+    self.calc_radius()
 
   def calc_points(self):
     """
