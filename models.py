@@ -19,12 +19,42 @@ class GameObject(object):
     self.color = color
     self.location = location
 
+  def draw(self):
+    '''
+    draw myself
+    '''
+    # draw them using brush
+    self.calc_points()
+    self.brush.poly(self.points, self.color)
+
 
 class Square(GameObject):
   '''
   a square
   '''
-  pass
+
+  def __init__(self, brush, size, color, location=None):
+    """
+    brush -- Brush()
+    size -- int
+    color -- RGB tuple good for sdl
+    location -- Point()
+    """
+    super(Square, self).__init__(brush, size, color, location=location)
+    self.calc_points()
+
+  def calc_points(self):
+    """
+    determine location of all points
+    :return:
+    """
+    self.points = [
+      Point(self.location.x - round(self.size / 2), self.location.y - round(self.size / 2)),
+      Point(self.location.x + round(self.size / 2), self.location.y - round(self.size / 2)),
+      Point(self.location.x + round(self.size / 2), self.location.y + round(self.size / 2)),
+      Point(self.location.x - round(self.size / 2), self.location.y + round(self.size / 2))
+
+    ]
 
 
 class TriangleMan(GameObject):
@@ -62,11 +92,3 @@ class TriangleMan(GameObject):
       Point(location.x, round(location.y - (2 / 3 * height))),
       Point(location.x + size / 2, round(location.y + 1 / 3 * height))
     ]
-
-  def draw(self):
-    '''
-    draw an equilateral triangle
-    '''
-    # draw them using brush
-    self.calc_points()
-    self.brush.poly(self.points, self.color)

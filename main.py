@@ -7,7 +7,7 @@ from colors import *
 from models import TriangleMan, Square
 from utils import Brush, Pen, Point
 
-map_width, map_height = 1200, 900
+map_width, map_height = 1000, 750
 
 
 def main():
@@ -29,7 +29,8 @@ def main():
   mans = TriangleMan(brush, 15, HEATWAVE, location=Point(25, 25))
 
   # game objects
-  goal_square = Square(brush, 5, PARADISE, location=Point(round(map_width * .75), round(map_height * .75)))
+  goal_square = Square(brush, 8, HEATWAVE, location=Point(round(map_width * .75), round(map_height * .75)))
+
   BKGRND = NIGHTFALL
 
   while running:
@@ -73,17 +74,19 @@ def main():
         mouse_x, mouse_y = ctypes.c_int(), ctypes.c_int()
         SDL_GetMouseState(mouse_x, mouse_y)
 
-    # movement
+    # more movement
     mans.location.x += mans.x_velo
     mans.location.y += mans.y_velo
-
-    # "goals"
-
-    # #1: touch white square
 
     # clear the screen
     SDL_SetRenderDrawColor(renderer, *BKGRND, SDL_ALPHA_OPAQUE)
     SDL_RenderClear(renderer)
+
+    # draw my stuff
+
+    # "goals"
+    goal_square.draw()
+    # #1: touch white square
 
     mans.draw()
     # draw all other assets
