@@ -1,3 +1,4 @@
+import math
 import os
 
 from os import path
@@ -105,27 +106,12 @@ class Game(object):
     :param o1: a game object
     :param o2: another game object
     :return: True if they collide
+
+    For now, just use Euclidean distance between spheres to determine collision.
+    TODO -- implement SAT but mayyyybe bake your own simple one based on testing each side
+    TODO -- move into Geometry class
     '''
 
-    # todo divide game into collision regions
-
-    # find horizontal overlap
-    left = o1.left
-    # o2's leftmost point is to the right of o1's
-    if o2.left.x > left.x:
-      left = o2.left
-
-    right = o1.right
-    # o2's rightmost point is to the left of o1's
-    if o2.right.x < o1.right.x:
-      right = o2.right
-
-    # scan from left->right of overlap and check if points overlap
-    for x in range(left.x, right.x + 1):
-      # o1 points @ x
-
-
-      # o2 point @ x
-      pass
-
-    raise Exception('not implemented')
+    if o1.size + o2.size >= math.sqrt(o1.size ** 2 + o2.size ** 2):
+      return True
+    return False
