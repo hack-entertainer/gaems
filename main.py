@@ -25,11 +25,13 @@ def main():
   brush = Brush(renderer)
   pen = Pen(renderer)
   # todo -- eventually move all game assets into game
+
   game = Game()
 
   # object
   mans = TriangleMan(brush, 15, HEATWAVE, location=Point(25, 25))
 
+  # todo -- move
   # game objects
   goal_square = Square(brush, 8, HEATWAVE, location=Point(round(map_width * .75), round(map_height * .75)))
 
@@ -86,8 +88,9 @@ def main():
 
     # draw my stuff
 
+    # todo -- move
     # "goals"
-    goal_square.draw()
+    # goal_square.draw()
     # #1: touch white square
 
     mans.draw()
@@ -95,9 +98,10 @@ def main():
 
     SDL_RenderPresent(renderer)
 
+    # todo -- move
     # collision
-    if game.collision(mans, goal_square):
-      running = False
+    # if game.collision(mans, goal_square):
+    #   running = False
 
   SDL_DestroyWindow(window)
   SDL_DestroyRenderer(renderer)
