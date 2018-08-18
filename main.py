@@ -5,7 +5,7 @@ from sdl2 import *
 
 from colors import *
 from models import TriangleMan, Square
-from utils import Brush, Pen, Point
+from utils import Brush, Game, Pen, Point
 
 map_width, map_height = 1000, 750
 
@@ -24,6 +24,8 @@ def main():
 
   brush = Brush(renderer)
   pen = Pen(renderer)
+  # todo -- eventually move all game assets into game
+  game = Game()
 
   # object
   mans = TriangleMan(brush, 15, HEATWAVE, location=Point(25, 25))
@@ -90,7 +92,12 @@ def main():
 
     mans.draw()
     # draw all other assets
+
     SDL_RenderPresent(renderer)
+
+    # collision
+    if game.collision(mans, goal_square):
+      running = False
 
   SDL_DestroyWindow(window)
   SDL_DestroyRenderer(renderer)

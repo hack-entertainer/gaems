@@ -1,6 +1,5 @@
 import math
 import os
-
 from os import path
 
 from sdl2 import *
@@ -112,6 +111,6 @@ class Game(object):
     TODO -- move into Geometry class
     '''
 
-    if o1.size + o2.size >= math.sqrt(o1.size ** 2 + o2.size ** 2):
-      return True
-    return False
+    return o1.size + o2.size >= math.sqrt(
+      (o1.location.x - o2.location.x) ** 2 + (o1.location.y - o2.location.y) ** 2
+    )
