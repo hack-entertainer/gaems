@@ -106,12 +106,16 @@ class Game:
   and win conditions
   """
 
-  def __init__(self, renderer):
+  def __init__(self, renderer, map_width, map_height):
     self.ongoing = True
     self.brush = Brush(renderer)
     self.pen = Pen(renderer)
 
+    self.m_width, self.m_height = map_width, map_height
+
     self.mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
+
+    self.goal_square = Square(self.brush, 8, HEATWAVE, location=Point(round(map_width * .75), round(map_height * .75)))
 
   def handle(self, event):
     if event.type == SDL_QUIT:
@@ -175,6 +179,7 @@ class Game:
     draw game assets
     '''
     self.mans.draw()
+    self.goal_square.draw()
 
   def update(self):
     '''
@@ -183,3 +188,6 @@ class Game:
     mans = self.mans
     mans.location.x += mans.x_velo
     mans.location.y += mans.y_velo
+
+    if self.collision(mans, self.goal_square):
+      self.ongoing = False

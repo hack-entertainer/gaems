@@ -7,10 +7,10 @@ from colors import *
 from models import TriangleMan, Square, Game
 from utils import Brush, Pen, Point
 
-map_width, map_height = 1000, 750
-
 
 def main():
+  map_width, map_height = 1000, 750
+
   # initialize surface and renderer
   SDL_Init(SDL_INIT_VIDEO)
   window = SDL_CreateWindow(b"Triangle Man",
@@ -21,15 +21,7 @@ def main():
   # main_loop
   event = SDL_Event()
 
-  brush = Brush(renderer)
-  pen = Pen(renderer)
-  # todo -- eventually move all game assets into game
-
-  game = Game(renderer)
-
-  # todo -- move
-  # game objects
-  goal_square = Square(brush, 8, HEATWAVE, location=Point(round(map_width * .75), round(map_height * .75)))
+  game = Game(renderer, map_width, map_height)
 
   BKGRND = NIGHTFALL
 
@@ -46,19 +38,9 @@ def main():
 
     # draw my stuff
 
-    # todo -- move
-    # "goals"
-    # goal_square.draw()
-    # #1: touch white square
-
     game.draw()
 
     SDL_RenderPresent(renderer)
-
-    # todo -- move
-    # collision
-    # if game.collision(mans, goal_square):
-    #   running = False
 
   SDL_DestroyWindow(window)
   SDL_DestroyRenderer(renderer)
