@@ -124,7 +124,7 @@ class Bullet(GameObject):
     self.y_velo = y_velo
     self.max_velo = max_velo
 
-    self.lifespan = datetime.timedelta(0, .5)
+    self.lifespan = datetime.timedelta(0, .35)
     self.creation = datetime.datetime.now()
 
     # define points, left, middle, right
@@ -158,8 +158,9 @@ class Game:
     self.m_width, self.m_height = map_width, map_height
 
     self.mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
+    self.mans.fire_rate = datetime.timedelta(0, .01)
     self.mans.firing = False
-
+    self.mans.last_fire = datetime.datetime.now()
 
     # objects fired by player
     self.missiles = []
@@ -175,34 +176,33 @@ class Game:
     if event.type == SDL_KEYDOWN:
 
       # update man's movement and state
-      if event.key.keysym.sym == SDLK_UP:
+      if event.key.keysym.sym == SDLK_w:
         if mans.y_velo > -1:
           mans.y_velo -= 1
-      elif event.key.keysym.sym == SDLK_DOWN:
+      elif event.key.keysym.sym == SDLK_s:
         if mans.y_velo < 1:
           mans.y_velo += 1
-      elif event.key.keysym.sym == SDLK_LEFT:
+      elif event.key.keysym.sym == SDLK_a:
         if mans.x_velo > -1:
           mans.x_velo -= 1
-      elif event.key.keysym.sym == SDLK_RIGHT:
+      elif event.key.keysym.sym == SDLK_d:
         if mans.x_velo < 1:
           mans.x_velo += 1
       elif event.key.keysym.sym == SDLK_SPACE:
-
         mans.firing = True
 
 
     elif event.type == SDL_KEYUP:
-      if event.key.keysym.sym == SDLK_UP:
+      if event.key.keysym.sym == SDLK_w:
         if mans.y_velo < 0:
           mans.y_velo += 1
-      elif event.key.keysym.sym == SDLK_DOWN:
+      elif event.key.keysym.sym == SDLK_s:
         if mans.y_velo > 0:
           mans.y_velo -= 1
-      elif event.key.keysym.sym == SDLK_LEFT:
+      elif event.key.keysym.sym == SDLK_a:
         if mans.x_velo < 0:
           mans.x_velo += 1
-      elif event.key.keysym.sym == SDLK_RIGHT:
+      elif event.key.keysym.sym == SDLK_d:
         if mans.x_velo > 0:
           mans.x_velo -= 1
       elif event.key.keysym.sym == SDLK_SPACE:
@@ -248,14 +248,17 @@ class Game:
     mans.location.x += mans.x_velo
     mans.location.y += mans.y_velo
 
-    missiles = self.missiles
-    if mans.firing:
-      missiles.append(Bullet(self.brush, 5, BLUE, location=Point(mans.location.x, mans.location.y)))
-
     # delete expired missiles
+    missiles = self.missiles
     for i in reversed(range(len(missiles))):
       if datetime.datetime.now() - missiles[i].creation > missiles[i].lifespan:
         missiles.pop(i)
+
+    if mans.firing:
+      # fire bullet if fire rate has passed
+      if datetime.datetime.now() - mans.last_fire > mans.fire_rate:
+        missiles.append(Bullet(self.brush, 5, BLUE, location=Point(mans.location.x, mans.location.y)))
+        mans.last_fire = datetime.datetime.now()
 
     if self.collision(mans, self.goal_square):
       self.ongoing = False
