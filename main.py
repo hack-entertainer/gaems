@@ -19,14 +19,13 @@ def main():
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED)
 
   # main_loop
-  running = True
   event = SDL_Event()
 
   brush = Brush(renderer)
   pen = Pen(renderer)
   # todo -- eventually move all game assets into game
 
-  game = Game()
+  game = Game(renderer)
 
   # object
   mans = TriangleMan(brush, 15, HEATWAVE, location=Point(25, 25))
@@ -37,11 +36,9 @@ def main():
 
   BKGRND = NIGHTFALL
 
-  while running:
+  while game.ongoing:
     while SDL_PollEvent(ctypes.byref(event)):
-      if event.type == SDL_QUIT:
-        running = False
-        break
+      game.handle(event)
 
       if event.type == SDL_KEYDOWN:
 

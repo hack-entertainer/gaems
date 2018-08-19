@@ -6,6 +6,38 @@ from sdl2 import *
 from sdl2 import ext
 
 
+class Game:
+  """
+  encompases (eventually) all assets and activities within a game such as collision detection, state management,
+  and win conditions
+  """
+
+  def __init__(self, renderer):
+    self.ongoing = True
+    self.brush = Brush(renderer)
+    self.pen = Pen(renderer)
+
+  def handle(self, event):
+    if event.type == SDL_QUIT:
+      self.ongoing = False
+
+  def collision(self, o1, o2):
+    '''
+
+    :param o1: a game object
+    :param o2: another game object
+    :return: True if they collide
+
+    For now, just use Euclidean distance between spheres to determine collision.
+    TODO -- implement SAT but mayyyybe bake your own simple one based on testing each side
+    TODO -- move into Geometry class
+    '''
+
+    return o1.size + o2.size >= math.sqrt(
+      (o1.location.x - o2.location.x) ** 2 + (o1.location.y - o2.location.y) ** 2
+    )
+
+
 class Point:
   def __init__(self, x, y):
     self.x = x
@@ -15,7 +47,7 @@ class Point:
     return ''.join(['Point(', str(self.x), ',', str(self.y), ')'])
 
 
-class Brush(object):
+class Brush:
   '''
   wrap the SDL objects and methods
   '''
@@ -44,7 +76,7 @@ class Brush(object):
     SDL_RenderDrawLine(renderer, int(p1.x), int(p1.y), int(p2.x), int(p2.y))
 
 
-class Pen(object):
+class Pen:
   '''
   draws text
   '''
@@ -67,7 +99,7 @@ class Pen(object):
     SDL_RenderCopy(renderer, texture, recta, recta)
 
 
-class Line(object):
+class Line:
   def __init__(self, p1, p2):
     self.slope = (p2.y - p1.y) / (p2.x - p1.x)
     self.intercept = p1.y - p1.x * self.slope
@@ -76,7 +108,7 @@ class Line(object):
     return self.slope * x + self.intercept
 
 
-class Geometry(object):
+class Geometry:
   '''
   geometry functions for polygons and kin
   '''
@@ -84,33 +116,3 @@ class Geometry(object):
   @classmethod
   def distance(cls, p1, p2):
     pass
-
-
-class Game(object):
-  """
-  encompases (eventually) all assets and activities within a game such as collision detection, state management,
-  and win conditions
-  """
-
-  def win(self):
-    '''
-
-    :return: True if win
-    '''
-    raise Exception('not implemented')
-
-  def collision(self, o1, o2):
-    '''
-
-    :param o1: a game object
-    :param o2: another game object
-    :return: True if they collide
-
-    For now, just use Euclidean distance between spheres to determine collision.
-    TODO -- implement SAT but mayyyybe bake your own simple one based on testing each side
-    TODO -- move into Geometry class
-    '''
-
-    return o1.size + o2.size >= math.sqrt(
-      (o1.location.x - o2.location.x) ** 2 + (o1.location.y - o2.location.y) ** 2
-    )
