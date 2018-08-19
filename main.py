@@ -4,9 +4,7 @@ import sys
 from sdl2 import *
 
 from colors import *
-from models import TriangleMan, Square, Game
-from utils import Brush, Pen, Point
-
+from models import Game
 
 def main():
   map_width, map_height = 1000, 750

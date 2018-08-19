@@ -1,7 +1,7 @@
 import ctypes
 import datetime
 
-from math import sqrt, sin, cos, tan
+from math import sqrt, sin, cos, pi
 from utils import Point, Brush
 
 from sdl2 import *
@@ -138,7 +138,7 @@ class Bullet(GameObject):
 
   '''
 
-  def __init__(self, brush, size, color, location=None, lifespan=1, velocity=(0, 0)):
+  def __init__(self, brush, size, color, location=None, lifespan=datetime.timedelta(0, .35), velocity=(1, 90)):
     """
     brush -- Brush()
     size -- int
@@ -148,7 +148,7 @@ class Bullet(GameObject):
     """
     super(Bullet, self).__init__(brush, size, color, location=location)
 
-    self.lifespan = datetime.timedelta(0, .35)
+    self.lifespan = lifespan
     self.creation = datetime.datetime.now()
     self.velocity = velocity
 
@@ -269,24 +269,25 @@ class Game:
     '''
     update game asset states
     '''
-    mans = self.mans
-    mans.move()
 
-    # delete expired missiles
+    # move missiles
     missiles = self.missiles
-    for i in reversed(range(len(missiles))):
-      if datetime.datetime.now() - missiles[i].creation > missiles[i].lifespan:
-        missiles.pop(i)
-
-    if mans.firing:
-      # fire bullet if fire rate has passed
-      if datetime.datetime.now() - mans.last_fire >= mans.fire_rate:
-        missiles.append(Bullet(self.brush, 5, BLUE, lifespan=datetime.timedelta(0, .0001),
-                               location=Point(mans.location.x, mans.location.y), velocity=(1.5, 360)))
-        mans.last_fire = datetime.datetime.now()
-
     for missile in missiles:
       missile.move()
 
+    mans = self.mans
+    mans.move()
+    if mans.firing:
+      # fire bullet if fire rate has passed
+      if datetime.datetime.now() - mans.last_fire >= mans.fire_rate:
+        missiles.append(Bullet(self.brush, 5, BLUE, lifespan=datetime.timedelta(0, .05),
+                               location=Point(mans.location.x, mans.location.y), velocity=(5, 1.125*pi)))
+        mans.last_fire = datetime.datetime.now()
+
     if self.collision(mans, self.goal_square):
       self.ongoing = False
+
+    # delete expired missiles
+    for i in reversed(range(len(missiles))):
+      if datetime.datetime.now() - missiles[i].creation > missiles[i].lifespan:
+        missiles.pop(i)
