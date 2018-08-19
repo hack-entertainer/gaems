@@ -127,6 +127,10 @@ class TriangleMan(GameObject):
       Point(location.x + size / 2, round(location.y + 1 / 3 * height))
     ]
 
+  def move(self):
+    self.location.x += self.x_velo
+    self.location.y += self.y_velo
+
 
 class Bullet(GameObject):
   '''
@@ -266,8 +270,7 @@ class Game:
     update game asset states
     '''
     mans = self.mans
-    mans.location.x += mans.x_velo
-    mans.location.y += mans.y_velo
+    mans.move()
 
     # delete expired missiles
     missiles = self.missiles
@@ -279,7 +282,7 @@ class Game:
       # fire bullet if fire rate has passed
       if datetime.datetime.now() - mans.last_fire >= mans.fire_rate:
         missiles.append(Bullet(self.brush, 5, BLUE, lifespan=datetime.timedelta(0, .0001),
-                               location=Point(mans.location.x, mans.location.y), velocity=(3, 90)))
+                               location=Point(mans.location.x, mans.location.y), velocity=(1.5, 360)))
         mans.last_fire = datetime.datetime.now()
 
     for missile in missiles:
