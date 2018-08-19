@@ -1,5 +1,6 @@
 import ctypes
 import datetime
+import random
 
 from math import sqrt
 from utils import Point, Brush
@@ -7,6 +8,7 @@ from utils import Point, Brush
 from sdl2 import *
 
 from colors import *
+
 from utils import Brush, Pen
 
 
@@ -122,7 +124,7 @@ class Bullet(GameObject):
     self.y_velo = y_velo
     self.max_velo = max_velo
 
-    self.lifespan = datetime.timedelta(0, .25)
+    self.lifespan = datetime.timedelta(0, .5)
     self.creation = datetime.datetime.now()
 
     # define points, left, middle, right
@@ -158,6 +160,7 @@ class Game:
     self.mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
     self.mans.firing = False
 
+
     # objects fired by player
     self.missiles = []
 
@@ -185,6 +188,7 @@ class Game:
         if mans.x_velo < 1:
           mans.x_velo += 1
       elif event.key.keysym.sym == SDLK_SPACE:
+
         mans.firing = True
 
 
@@ -246,7 +250,7 @@ class Game:
 
     missiles = self.missiles
     if mans.firing:
-      missiles.append(Bullet(self.brush, 15, HEATWAVE, location=Point(mans.location.x, mans.location.y)))
+      missiles.append(Bullet(self.brush, 5, BLUE, location=Point(mans.location.x, mans.location.y)))
 
     # delete expired missiles
     for i in reversed(range(len(missiles))):
