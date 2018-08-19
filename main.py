@@ -4,8 +4,8 @@ import sys
 from sdl2 import *
 
 from colors import *
-from models import TriangleMan, Square
-from utils import Brush, Game, Pen, Point
+from models import TriangleMan, Square, Game
+from utils import Brush, Pen, Point
 
 map_width, map_height = 1000, 750
 
@@ -27,9 +27,6 @@ def main():
 
   game = Game(renderer)
 
-  # object
-  mans = TriangleMan(brush, 15, HEATWAVE, location=Point(25, 25))
-
   # todo -- move
   # game objects
   goal_square = Square(brush, 8, HEATWAVE, location=Point(round(map_width * .75), round(map_height * .75)))
@@ -40,44 +37,8 @@ def main():
     while SDL_PollEvent(ctypes.byref(event)):
       game.handle(event)
 
-      if event.type == SDL_KEYDOWN:
-
-        # move mans
-        if event.key.keysym.sym == SDLK_UP:
-          if mans.y_velo > -1:
-            mans.y_velo -= 1
-        elif event.key.keysym.sym == SDLK_DOWN:
-          if mans.y_velo < 1:
-            mans.y_velo += 1
-        elif event.key.keysym.sym == SDLK_LEFT:
-          if mans.x_velo > -1:
-            mans.x_velo -= 1
-        elif event.key.keysym.sym == SDLK_RIGHT:
-          if mans.x_velo < 1:
-            mans.x_velo += 1
-
-      elif event.type == SDL_KEYUP:
-        if event.key.keysym.sym == SDLK_UP:
-          if mans.y_velo < 0:
-            mans.y_velo += 1
-        elif event.key.keysym.sym == SDLK_DOWN:
-          if mans.y_velo > 0:
-            mans.y_velo -= 1
-        elif event.key.keysym.sym == SDLK_LEFT:
-          if mans.x_velo < 0:
-            mans.x_velo += 1
-        elif event.key.keysym.sym == SDLK_RIGHT:
-          if mans.x_velo > 0:
-            mans.x_velo -= 1
-
-      elif event.type == SDL_MOUSEBUTTONUP:
-        # get position of click
-        mouse_x, mouse_y = ctypes.c_int(), ctypes.c_int()
-        SDL_GetMouseState(mouse_x, mouse_y)
-
-    # more movement
-    mans.location.x += mans.x_velo
-    mans.location.y += mans.y_velo
+    # update game assets
+    game.update()
 
     # clear the screen
     SDL_SetRenderDrawColor(renderer, *BKGRND, SDL_ALPHA_OPAQUE)
@@ -90,8 +51,7 @@ def main():
     # goal_square.draw()
     # #1: touch white square
 
-    mans.draw()
-    # draw all other assets
+    game.draw()
 
     SDL_RenderPresent(renderer)
 

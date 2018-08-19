@@ -1,41 +1,8 @@
-import math
 import os
 from os import path
 
 from sdl2 import *
 from sdl2 import ext
-
-
-class Game:
-  """
-  encompases (eventually) all assets and activities within a game such as collision detection, state management,
-  and win conditions
-  """
-
-  def __init__(self, renderer):
-    self.ongoing = True
-    self.brush = Brush(renderer)
-    self.pen = Pen(renderer)
-
-  def handle(self, event):
-    if event.type == SDL_QUIT:
-      self.ongoing = False
-
-  def collision(self, o1, o2):
-    '''
-
-    :param o1: a game object
-    :param o2: another game object
-    :return: True if they collide
-
-    For now, just use Euclidean distance between spheres to determine collision.
-    TODO -- implement SAT but mayyyybe bake your own simple one based on testing each side
-    TODO -- move into Geometry class
-    '''
-
-    return o1.size + o2.size >= math.sqrt(
-      (o1.location.x - o2.location.x) ** 2 + (o1.location.y - o2.location.y) ** 2
-    )
 
 
 class Point:

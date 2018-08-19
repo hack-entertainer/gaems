@@ -1,5 +1,11 @@
+import ctypes
 from math import sqrt
-from utils import Line, Point
+from utils import Point, Brush
+
+from sdl2 import *
+
+from colors import *
+from utils import Brush, Pen
 
 
 class GameObject(object):
@@ -92,3 +98,88 @@ class TriangleMan(GameObject):
       Point(location.x, round(location.y - (2 / 3 * height))),
       Point(location.x + size / 2, round(location.y + 1 / 3 * height))
     ]
+
+
+class Game:
+  """
+  encompases (eventually) all assets and activities within a game such as collision detection, state management,
+  and win conditions
+  """
+
+  def __init__(self, renderer):
+    self.ongoing = True
+    self.brush = Brush(renderer)
+    self.pen = Pen(renderer)
+
+    self.mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
+
+  def handle(self, event):
+    if event.type == SDL_QUIT:
+      self.ongoing = False
+
+    # handle man updates
+    mans = self.mans
+    if event.type == SDL_KEYDOWN:
+
+      # move mans
+      if event.key.keysym.sym == SDLK_UP:
+        if mans.y_velo > -1:
+          mans.y_velo -= 1
+      elif event.key.keysym.sym == SDLK_DOWN:
+        if mans.y_velo < 1:
+          mans.y_velo += 1
+      elif event.key.keysym.sym == SDLK_LEFT:
+        if mans.x_velo > -1:
+          mans.x_velo -= 1
+      elif event.key.keysym.sym == SDLK_RIGHT:
+        if mans.x_velo < 1:
+          mans.x_velo += 1
+
+    elif event.type == SDL_KEYUP:
+      if event.key.keysym.sym == SDLK_UP:
+        if mans.y_velo < 0:
+          mans.y_velo += 1
+      elif event.key.keysym.sym == SDLK_DOWN:
+        if mans.y_velo > 0:
+          mans.y_velo -= 1
+      elif event.key.keysym.sym == SDLK_LEFT:
+        if mans.x_velo < 0:
+          mans.x_velo += 1
+      elif event.key.keysym.sym == SDLK_RIGHT:
+        if mans.x_velo > 0:
+          mans.x_velo -= 1
+
+    elif event.type == SDL_MOUSEBUTTONUP:
+      # get position of click
+      mouse_x, mouse_y = ctypes.c_int(), ctypes.c_int()
+      SDL_GetMouseState(mouse_x, mouse_y)
+
+  def collision(self, o1, o2):
+    '''
+
+    :param o1: a game object
+    :param o2: another game object
+    :return: True if they collide
+
+    For now, just use Euclidean distance between spheres to determine collision.
+    TODO -- implement SAT but mayyyybe bake your own simple one based on testing each side
+    TODO -- move into Geometry class
+    '''
+
+    return o1.size + o2.size >= sqrt(
+      (o1.location.x - o2.location.x) ** 2 + (o1.location.y - o2.location.y) ** 2
+    )
+
+  def draw(self):
+    '''
+    draw game assets
+    '''
+    self.mans.draw()
+
+  def update(self):
+    '''
+    update game asset states
+    '''
+    mans = self.mans
+    mans.location.x += mans.x_velo
+    mans.location.y += mans.y_velo
