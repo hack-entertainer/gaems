@@ -1,8 +1,7 @@
 import ctypes
 import datetime
-import random
 
-from math import sqrt
+from math import sqrt, sin, cos, tan
 from utils import Point, Brush
 
 from sdl2 import *
@@ -36,6 +35,31 @@ class GameObject(object):
     # draw them using brush
     self.calc_points()
     self.brush.poly(self.points, self.color)
+
+  def move(self):
+    '''
+    use velocity to calculate new location
+    '''
+    speed, angle = self.velocity
+
+    # SOH CAH TOA
+
+    # assume 0 <= angle <= 90; quadrant I
+    x_dist = speed * cos(angle)  # CAH
+    y_dist = speed * sin(angle)  # SOH
+
+    # use reflection for quadrants II-IV
+    if 90 <= angle <= 180:
+      x_dist *= -1
+    elif 180 <= angle <= 270:
+      x_dist *= -1
+      y_dist *= -1
+    else:
+      # 270 <= angle <= 360
+      y_dist *= -1
+
+    self.location.x += x_dist
+    self.location.y += y_dist
 
 
 class Square(GameObject):
@@ -110,22 +134,19 @@ class Bullet(GameObject):
 
   '''
 
-  def __init__(self, brush, size, color, location=None, x_velo=0, y_velo=0, max_velo=0, lifespan=1):
+  def __init__(self, brush, size, color, location=None, lifespan=1, velocity=(0, 0)):
     """
     brush -- Brush()
     size -- int
     color -- RGB tuple good for sdl
     location -- Point()
+    velocity -- tuple(['speed', 'direction as degrees of a circle'])
     """
     super(Bullet, self).__init__(brush, size, color, location=location)
 
-    # for movement
-    self.x_velo = x_velo
-    self.y_velo = y_velo
-    self.max_velo = max_velo
-
     self.lifespan = datetime.timedelta(0, .35)
     self.creation = datetime.datetime.now()
+    self.velocity = velocity
 
     # define points, left, middle, right
     self.height = sqrt(size ** 2 - (size ** 2 / 4))
@@ -256,9 +277,13 @@ class Game:
 
     if mans.firing:
       # fire bullet if fire rate has passed
-      if datetime.datetime.now() - mans.last_fire > mans.fire_rate:
-        missiles.append(Bullet(self.brush, 5, BLUE, location=Point(mans.location.x, mans.location.y)))
+      if datetime.datetime.now() - mans.last_fire >= mans.fire_rate:
+        missiles.append(Bullet(self.brush, 5, BLUE, lifespan=datetime.timedelta(0, .0001),
+                               location=Point(mans.location.x, mans.location.y), velocity=(3, 90)))
         mans.last_fire = datetime.datetime.now()
+
+    for missile in missiles:
+      missile.move()
 
     if self.collision(mans, self.goal_square):
       self.ongoing = False
