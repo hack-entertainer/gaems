@@ -1,4 +1,6 @@
 import ctypes
+import datetime
+
 from math import sqrt
 from utils import Point, Brush
 
@@ -100,6 +102,46 @@ class TriangleMan(GameObject):
     ]
 
 
+class Bullet(GameObject):
+  '''
+  a triangle-shaped man
+
+  '''
+
+  def __init__(self, brush, size, color, location=None, x_velo=0, y_velo=0, max_velo=0, lifespan=1):
+    """
+    brush -- Brush()
+    size -- int
+    color -- RGB tuple good for sdl
+    location -- Point()
+    """
+    super(Bullet, self).__init__(brush, size, color, location=location)
+
+    # for movement
+    self.x_velo = x_velo
+    self.y_velo = y_velo
+    self.max_velo = max_velo
+
+    self.lifespan = datetime.timedelta(0, .25)
+    self.creation = datetime.datetime.now()
+
+    # define points, left, middle, right
+    self.height = sqrt(size ** 2 - (size ** 2 / 4))
+    self.calc_points()
+
+  def calc_points(self):
+    '''
+    draw points
+    :return:
+    '''
+    location, size, height = self.location, self.size, self.height
+    self.points = [
+      Point(location.x - size / 2, round(location.y + 1 / 3 * height)),
+      Point(location.x, round(location.y - (2 / 3 * height))),
+      Point(location.x + size / 2, round(location.y + 1 / 3 * height))
+    ]
+
+
 class Game:
   """
   encompases (eventually) all assets and activities within a game such as collision detection, state management,
@@ -114,6 +156,10 @@ class Game:
     self.m_width, self.m_height = map_width, map_height
 
     self.mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
+    self.mans.firing = False
+
+    # objects fired by player
+    self.missiles = []
 
     self.goal_square = Square(self.brush, 8, HEATWAVE, location=Point(round(map_width * .75), round(map_height * .75)))
 
@@ -125,7 +171,7 @@ class Game:
     mans = self.mans
     if event.type == SDL_KEYDOWN:
 
-      # move mans
+      # update man's movement and state
       if event.key.keysym.sym == SDLK_UP:
         if mans.y_velo > -1:
           mans.y_velo -= 1
@@ -138,6 +184,9 @@ class Game:
       elif event.key.keysym.sym == SDLK_RIGHT:
         if mans.x_velo < 1:
           mans.x_velo += 1
+      elif event.key.keysym.sym == SDLK_SPACE:
+        mans.firing = True
+
 
     elif event.type == SDL_KEYUP:
       if event.key.keysym.sym == SDLK_UP:
@@ -152,6 +201,9 @@ class Game:
       elif event.key.keysym.sym == SDLK_RIGHT:
         if mans.x_velo > 0:
           mans.x_velo -= 1
+      elif event.key.keysym.sym == SDLK_SPACE:
+        mans.firing = False
+
 
     elif event.type == SDL_MOUSEBUTTONUP:
       # get position of click
@@ -181,6 +233,9 @@ class Game:
     self.mans.draw()
     self.goal_square.draw()
 
+    for missile in self.missiles:
+      missile.draw()
+
   def update(self):
     '''
     update game asset states
@@ -188,6 +243,15 @@ class Game:
     mans = self.mans
     mans.location.x += mans.x_velo
     mans.location.y += mans.y_velo
+
+    missiles = self.missiles
+    if mans.firing:
+      missiles.append(Bullet(self.brush, 15, HEATWAVE, location=Point(mans.location.x, mans.location.y)))
+
+    # delete expired missiles
+    for i in reversed(range(len(missiles))):
+      if datetime.datetime.now() - missiles[i].creation > missiles[i].lifespan:
+        missiles.pop(i)
 
     if self.collision(mans, self.goal_square):
       self.ongoing = False

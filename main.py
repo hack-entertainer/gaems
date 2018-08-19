@@ -37,7 +37,6 @@ def main():
     SDL_RenderClear(renderer)
 
     # draw my stuff
-
     game.draw()
 
     SDL_RenderPresent(renderer)
