@@ -176,16 +176,16 @@ class Game:
     if event.type == SDL_KEYDOWN:
 
       # update man's movement and state
-      if event.key.keysym.sym == SDLK_w:
+      if event.key.keysym.sym == SDLK_UP:
         if mans.y_velo > -1:
           mans.y_velo -= 1
-      elif event.key.keysym.sym == SDLK_s:
+      elif event.key.keysym.sym == SDLK_DOWN:
         if mans.y_velo < 1:
           mans.y_velo += 1
-      elif event.key.keysym.sym == SDLK_a:
+      elif event.key.keysym.sym == SDLK_LEFT:
         if mans.x_velo > -1:
           mans.x_velo -= 1
-      elif event.key.keysym.sym == SDLK_d:
+      elif event.key.keysym.sym == SDLK_RIGHT:
         if mans.x_velo < 1:
           mans.x_velo += 1
       elif event.key.keysym.sym == SDLK_SPACE:
@@ -193,16 +193,16 @@ class Game:
 
 
     elif event.type == SDL_KEYUP:
-      if event.key.keysym.sym == SDLK_w:
+      if event.key.keysym.sym == SDLK_UP:
         if mans.y_velo < 0:
           mans.y_velo += 1
-      elif event.key.keysym.sym == SDLK_s:
+      elif event.key.keysym.sym == SDLK_DOWN:
         if mans.y_velo > 0:
           mans.y_velo -= 1
-      elif event.key.keysym.sym == SDLK_a:
+      elif event.key.keysym.sym == SDLK_LEFT:
         if mans.x_velo < 0:
           mans.x_velo += 1
-      elif event.key.keysym.sym == SDLK_d:
+      elif event.key.keysym.sym == SDLK_RIGHT:
         if mans.x_velo > 0:
           mans.x_velo -= 1
       elif event.key.keysym.sym == SDLK_SPACE:
