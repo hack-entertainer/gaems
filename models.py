@@ -111,7 +111,7 @@ class TriangleMan(GameObject):
     self.max_velo = max_velo
 
     # aim
-    self.aim = 0
+    self.aim = 3 / 2 * pi
 
     # define points, left, middle, right
     self.height = sqrt(size ** 2 - (size ** 2 / 4))
@@ -133,17 +133,19 @@ class TriangleMan(GameObject):
     self.location.x += self.x_velo
     self.location.y += self.y_velo
 
-  def set_aim(self, radians):
-    '''
-    aim is based on state of wasd keys and time when each key was last pressed/released
-    aim is indicated in radians
-    '''
-    self.aim = radians
+  # def set_aim(self, radians):
+  #   '''
+  #
+  #   radians -- float()
+  #
+  #   aim is based on state of wasd keys and time when each key was last pressed/released
+  #   '''
+  #   self.aim = radians
 
 
 class Bullet(GameObject):
   '''
-  a triangle-shaped man
+  a triangleman-like object
 
   '''
 
@@ -191,12 +193,14 @@ class Game:
 
     self.m_width, self.m_height = map_width, map_height
 
+    # keyboard state
+    self.keyboard = {}
+
     # todo -- as this set of code gets longer, bake more of the structure into the TriangleMan object
     mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
     mans.fire_rate = timedelta(0, .125)
     mans.firing = False
     mans.last_fire = datetime.now()
-    mans.aim = {}
 
     self.mans = mans
 
@@ -210,20 +214,50 @@ class Game:
     compute aim based on state of keys
     :return: aim, in radians
     '''
-    keys = [keyboard[key] for key in [SDLK_w, SDLK_a, SDLK_s, SDLK_d]]
+    # todo -- fix bug here
+    keys = [SDLK_w, SDLK_a, SDLK_s, SDLK_d]
+    keyboard = self.keyboard
 
-    up = [key for key in keys if key['state'] is 'up']
-    down = [key for key in keys if key['state'] is 'down']
+    down = [key for key in keys if key and keyboard.setdefault([key]['state'] is 'down']
+    up = [key for key in keys if key and keyboard[key]['state'] is 'up']
 
     # yay, context
-    up.sort(key=lambda button: button['state'])
-    down.sort(key=lambda button: button['state'])
+    up.sort(key=lambda button: keyboard[button]['state'])
+    down.sort(key=lambda button: keyboard[button]['state'])
+
+    # radians
+    aim = 0
+
+    aims = {
+      SDLK_w: 1 / 2,
+      SDLK_a: 1,
+      SDLK_s: 3 / 2,
+      SDLK_d: 0
+    }
+    diagonal_aims = {
+      SDLK_w: {SDLK_a: 3 / 4, SDLK_d: 1 / 4},
+      SDLK_a: {SDLK_w: 3 / 4, SDLK_s: 5 / 4},
+      SDLK_s: {SDLK_a: 5 / 4, SDLK_d: 7 / 4},
+      SDLK_d: {SDLK_w: 1 / 4, SDLK_s: 7 / 4}
+    }
+
+    diagonal_pairs = {
+      SDLK_w: [SDLK_a, SDLK_d],
+      SDLK_a: [SDLK_w, SDLK_s],
+      SDLK_s: [SDLK_a, SDLK_d],
+      SDLK_d: [SDLK_w, SDLK_s]
+    }
 
     # if any keys down, aim based on those
     if len(down) > 0:
       # if 1 key down, aim that way
+      last = down[0]
+
       # if 2 or more, aim according to last two horizontal, vertical keys pressed
-      pass
+      for second2last in down[1:]:
+        if second2last in diagonal_pairs[last]:
+          aim = diagonal_aims[last][second2last]
+          break
     else:
       # aim based on last keys released
 
@@ -232,7 +266,7 @@ class Game:
       # else, aim diagonally
       pass
 
-    raise Exception('not implemented')
+    return aim * pi
 
   def handle(self, event):
     if event.type == SDL_QUIT:
@@ -240,7 +274,7 @@ class Game:
 
     # handle man updates
     mans = self.mans
-    keyboard = mans.aim
+    keyboard = {}
     if event.type == SDL_KEYDOWN:
 
       # update man's movement and state
@@ -260,8 +294,8 @@ class Game:
         mans.firing = True
       elif event.key.keysym.sym in [SDLK_w, SDLK_a, SDLK_s, SDLK_d]:
         # aiming using w, a, s, d keys
-        keyboard[event.key.keysym.sym] = {'state': 'down', 'time': datetime.now()}
-        mans.set_aim(self.compute_aim())
+        self.keyboard.setdefault(event.key.keysym.sym, {'state': 'down', 'time': datetime.now()})
+        mans.aim = self.compute_aim()
 
 
     elif event.type == SDL_KEYUP:
@@ -281,8 +315,8 @@ class Game:
         mans.firing = False
       elif event.key.keysym.sym in [SDLK_w, SDLK_a, SDLK_s, SDLK_d]:
         # aiming using w, a, s, d keys
-        keyboard[event.key.keysym.sym] = {'state': 'up', 'time': datetime.now()}
-        mans.set_aim(self.compute_aim())
+        self.keyboard.setdefault(event.key.keysym.sym, {'state': 'up', 'time': datetime.now()})
+        mans.aim = self.compute_aim()
 
 
 
@@ -333,7 +367,7 @@ class Game:
       # fire bullet at correct frequency
       if datetime.now() - mans.last_fire >= mans.fire_rate:
         missiles.append(Bullet(self.brush, 5, BLUE, lifespan=timedelta(0, .5),
-                               location=Point(mans.location.x, mans.location.y), velocity=(1, 1.125 * pi)))
+                               location=Point(mans.location.x, mans.location.y), velocity=(1, mans.aim)))
         mans.last_fire = datetime.now()
 
     if self.collision(mans, self.goal_square):
