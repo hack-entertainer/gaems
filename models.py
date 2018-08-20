@@ -321,13 +321,6 @@ class Game:
         self.keyboard.setdefault(event.key.keysym.sym, {'state': 'up', 'time': datetime.now()})
         mans.aim = self.compute_aim()
 
-
-
-    elif event.type == SDL_MOUSEBUTTONUP:
-      # get position of click
-      mouse_x, mouse_y = ctypes.c_int(), ctypes.c_int()
-      SDL_GetMouseState(mouse_x, mouse_y)
-
   def collision(self, o1, o2):
     '''
 
