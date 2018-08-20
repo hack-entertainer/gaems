@@ -1,14 +1,12 @@
 import ctypes
-import datetime
 
+from datetime import datetime, timedelta
 from math import sqrt, sin, cos, pi
-from utils import Point, Brush
 
 from sdl2 import *
 
+from utils import Point, Pen, Brush
 from colors import *
-
-from utils import Brush, Pen
 
 
 class GameObject(object):
@@ -49,6 +47,7 @@ class GameObject(object):
     y_dist = speed * sin(angle)  # SOH
 
     # use reflection for quadrants II-IV
+    # todo -- convert from degrees to radians here; works now but... it shouldn't >:/
     if 90 <= angle <= 180:
       x_dist *= -1
     elif 180 <= angle <= 270:
@@ -111,6 +110,9 @@ class TriangleMan(GameObject):
     self.y_velo = y_velo
     self.max_velo = max_velo
 
+    # aim
+    self.aim = 0
+
     # define points, left, middle, right
     self.height = sqrt(size ** 2 - (size ** 2 / 4))
     self.calc_points()
@@ -131,6 +133,13 @@ class TriangleMan(GameObject):
     self.location.x += self.x_velo
     self.location.y += self.y_velo
 
+  def set_aim(self, radians):
+    '''
+    aim is based on state of wasd keys and time when each key was last pressed/released
+    aim is indicated in radians
+    '''
+    self.aim = radians
+
 
 class Bullet(GameObject):
   '''
@@ -138,7 +147,7 @@ class Bullet(GameObject):
 
   '''
 
-  def __init__(self, brush, size, color, location=None, lifespan=datetime.timedelta(0, .35), velocity=(1, 90)):
+  def __init__(self, brush, size, color, location=None, lifespan=timedelta(0, .25), velocity=(1, 90)):
     """
     brush -- Brush()
     size -- int
@@ -149,7 +158,7 @@ class Bullet(GameObject):
     super(Bullet, self).__init__(brush, size, color, location=location)
 
     self.lifespan = lifespan
-    self.creation = datetime.datetime.now()
+    self.creation = datetime.now()
     self.velocity = velocity
 
     # define points, left, middle, right
@@ -182,15 +191,48 @@ class Game:
 
     self.m_width, self.m_height = map_width, map_height
 
-    self.mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
-    self.mans.fire_rate = datetime.timedelta(0, .01)
-    self.mans.firing = False
-    self.mans.last_fire = datetime.datetime.now()
+    # todo -- as this set of code gets longer, bake more of the structure into the TriangleMan object
+    mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
+    mans.fire_rate = timedelta(0, .125)
+    mans.firing = False
+    mans.last_fire = datetime.now()
+    mans.aim = {}
+
+    self.mans = mans
 
     # objects fired by player
     self.missiles = []
 
     self.goal_square = Square(self.brush, 8, HEATWAVE, location=Point(round(map_width * .75), round(map_height * .75)))
+
+  def compute_aim(self):
+    '''
+    compute aim based on state of keys
+    :return: aim, in radians
+    '''
+    keys = [keyboard[key] for key in [SDLK_w, SDLK_a, SDLK_s, SDLK_d]]
+
+    up = [key for key in keys if key['state'] is 'up']
+    down = [key for key in keys if key['state'] is 'down']
+
+    # yay, context
+    up.sort(key=lambda button: button['state'])
+    down.sort(key=lambda button: button['state'])
+
+    # if any keys down, aim based on those
+    if len(down) > 0:
+      # if 1 key down, aim that way
+      # if 2 or more, aim according to last two horizontal, vertical keys pressed
+      pass
+    else:
+      # aim based on last keys released
+
+      # if time between 1st and 2nd last keys beyond threshold, aim in cardinal direction
+
+      # else, aim diagonally
+      pass
+
+    raise Exception('not implemented')
 
   def handle(self, event):
     if event.type == SDL_QUIT:
@@ -198,6 +240,7 @@ class Game:
 
     # handle man updates
     mans = self.mans
+    keyboard = mans.aim
     if event.type == SDL_KEYDOWN:
 
       # update man's movement and state
@@ -215,6 +258,10 @@ class Game:
           mans.x_velo += 1
       elif event.key.keysym.sym == SDLK_SPACE:
         mans.firing = True
+      elif event.key.keysym.sym in [SDLK_w, SDLK_a, SDLK_s, SDLK_d]:
+        # aiming using w, a, s, d keys
+        keyboard[event.key.keysym.sym] = {'state': 'down', 'time': datetime.now()}
+        mans.set_aim(self.compute_aim())
 
 
     elif event.type == SDL_KEYUP:
@@ -232,6 +279,11 @@ class Game:
           mans.x_velo -= 1
       elif event.key.keysym.sym == SDLK_SPACE:
         mans.firing = False
+      elif event.key.keysym.sym in [SDLK_w, SDLK_a, SDLK_s, SDLK_d]:
+        # aiming using w, a, s, d keys
+        keyboard[event.key.keysym.sym] = {'state': 'up', 'time': datetime.now()}
+        mans.set_aim(self.compute_aim())
+
 
 
     elif event.type == SDL_MOUSEBUTTONUP:
@@ -278,16 +330,16 @@ class Game:
     mans = self.mans
     mans.move()
     if mans.firing:
-      # fire bullet if fire rate has passed
-      if datetime.datetime.now() - mans.last_fire >= mans.fire_rate:
-        missiles.append(Bullet(self.brush, 5, BLUE, lifespan=datetime.timedelta(0, .05),
-                               location=Point(mans.location.x, mans.location.y), velocity=(5, 1.125*pi)))
-        mans.last_fire = datetime.datetime.now()
+      # fire bullet at correct frequency
+      if datetime.now() - mans.last_fire >= mans.fire_rate:
+        missiles.append(Bullet(self.brush, 5, BLUE, lifespan=timedelta(0, .5),
+                               location=Point(mans.location.x, mans.location.y), velocity=(1, 1.125 * pi)))
+        mans.last_fire = datetime.now()
 
     if self.collision(mans, self.goal_square):
       self.ongoing = False
 
     # delete expired missiles
     for i in reversed(range(len(missiles))):
-      if datetime.datetime.now() - missiles[i].creation > missiles[i].lifespan:
+      if datetime.now() - missiles[i].creation > missiles[i].lifespan:
         missiles.pop(i)
