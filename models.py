@@ -208,6 +208,9 @@ class Game:
     mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
     self.mans = mans
 
+    # aiming
+    self.diagonal_aim_threshold = timedelta(0, .33)
+
     # objects fired by player
     self.missiles = []
 
@@ -257,17 +260,22 @@ class Game:
       aim = aims[last]
 
       # if 2 or more, aim according to last two horizontal, vertical keys pressed
-      # for second2last in down[1:]:
-      #   if second2last in diagonal_pairs[last]:
-      #     aim = diagonal_aims[last][second2last]
-      #     break
+      for second2last in down[1:]:
+        if second2last in diagonal_pairs[last] and \
+            keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
+          aim = diagonal_aims[last][second2last]
+          break
     else:
-      # aim based on last keys released
+      # if 1 key down, aim that way
+      last = up[0]
+      aim = aims[last]
 
-      # if time between 1st and 2nd last keys beyond threshold, aim in cardinal direction
-
-      # else, aim diagonally
-      pass
+      # if 2 or more, aim according to last two horizontal, vertical keys pressed
+      for second2last in up[1:]:
+        if second2last in diagonal_pairs[last] and \
+            keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
+          aim = diagonal_aims[last][second2last]
+          break
 
     return aim * pi
 
@@ -297,7 +305,7 @@ class Game:
         mans.firing = True
       elif event.key.keysym.sym in [SDLK_w, SDLK_a, SDLK_s, SDLK_d]:
         # aiming using w, a, s, d keys
-        keyboard.setdefault(event.key.keysym.sym, {'state': 'down', 'time': datetime.now()})
+        self.keyboard[event.key.keysym.sym] = {'state': 'down', 'time': datetime.now()}
         mans.aim = self.compute_aim()
 
 
@@ -318,10 +326,11 @@ class Game:
         mans.firing = False
       elif event.key.keysym.sym in [SDLK_w, SDLK_a, SDLK_s, SDLK_d]:
         # aiming using w, a, s, d keys
-        self.keyboard.setdefault(event.key.keysym.sym, {'state': 'up', 'time': datetime.now()})
+        self.keyboard[event.key.keysym.sym] = {'state': 'up', 'time': datetime.now()}
         mans.aim = self.compute_aim()
 
-  def collision(self, o1, o2):
+  @classmethod
+  def collision(cls, o1, o2):
     '''
 
     :param o1: a game object
