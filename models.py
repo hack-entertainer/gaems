@@ -254,18 +254,19 @@ class Game:
     }
 
     # if any keys down, aim based on those
-    if len(down) > 0:
-      # if 1 key down, aim that way
-      last = down[0]
-      aim = aims[last]
-
-      # if 2 or more, aim according to last two horizontal, vertical keys pressed
-      for second2last in down[1:]:
-        if second2last in diagonal_pairs[last] and \
-            keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
-          aim = diagonal_aims[last][second2last]
-          break
-    else:
+    # if len(down) > 0:
+    #   # if 1 key down, aim that way
+    #   last = down[0]
+    #   aim = aims[last]
+    #
+    #   # if 2 or more, aim according to last two horizontal, vertical keys pressed
+    #   for second2last in down[1:]:
+    #     if second2last in diagonal_pairs[last] and \
+    #         keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
+    #       aim = diagonal_aims[last][second2last]
+    #       break
+    # else:
+    if len(down) is 0:
       # if 1 key down, aim that way
       last = up[0]
       aim = aims[last]
@@ -371,14 +372,16 @@ class Game:
     if mans.firing:
       # fire bullet at correct frequency
       if datetime.now() - mans.last_fire >= mans.fire_rate:
-        missiles.append(Bullet(self.brush, 5, BLUE, lifespan=timedelta(0, .5),
-                               location=Point(mans.location.x, mans.location.y), velocity=(1, mans.aim)))
+        missiles.append(Bullet(
+          self.brush, 5, BLUE, lifespan=timedelta(0, .5), location=Point(mans.location.x, mans.location.y),
+          velocity=(1.5, mans.aim)
+        ))
         mans.last_fire = datetime.now()
-
-    if self.collision(mans, self.goal_square):
-      self.ongoing = False
 
     # delete expired missiles
     for i in reversed(range(len(missiles))):
       if datetime.now() - missiles[i].creation > missiles[i].lifespan:
         missiles.pop(i)
+
+    if self.collision(mans, self.goal_square):
+      self.ongoing = False
