@@ -221,7 +221,6 @@ class Game:
     compute aim based on state of keys
     :return: aim, in radians
     '''
-    # todo -- fix bug here
     keys = [SDLK_w, SDLK_a, SDLK_s, SDLK_d]
     keyboard = self.keyboard
 
@@ -266,18 +265,17 @@ class Game:
             keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
           aim = diagonal_aims[last][second2last]
           break
-    # else:
-    # if len(down) is 0:
-    #   # if 1 key down, aim that way
-    #   last = up[0]
-    #   aim = aims[last]
-    #
-    #   # if 2 or more, aim according to last two horizontal, vertical keys pressed
-    #   for second2last in up[1:]:
-    #     if second2last in diagonal_pairs[last] and \
-    #         keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
-    #       aim = diagonal_aims[last][second2last]
-    #       break
+    else:
+      # if 1 key down, aim that way
+      last = up[0]
+      aim = aims[last]
+
+      # if 2 or more, aim according to last two horizontal, vertical keys pressed
+      for second2last in up[1:]:
+        if second2last in diagonal_pairs[last] and \
+            keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
+          aim = diagonal_aims[last][second2last]
+          break
 
     return aim * pi
 

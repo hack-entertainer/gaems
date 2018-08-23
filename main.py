@@ -1,10 +1,28 @@
 import ctypes
 import sys
 
-from sdl2 import *
+from sdl2 import (
+  SDL_Init,
+  SDL_INIT_VIDEO,
+  SDL_CreateWindow,
+  SDL_WINDOWPOS_CENTERED,
+  SDL_WINDOW_SHOWN,
+  SDL_CreateRenderer,
+  SDL_RENDERER_ACCELERATED,
+  SDL_Event,
+  SDL_PollEvent,
+  SDL_SetRenderDrawColor,
+  SDL_ALPHA_OPAQUE,
+  SDL_RenderClear,
+  SDL_RenderPresent,
+  SDL_DestroyWindow,
+  SDL_DestroyRenderer,
+  SDL_Quit
+)
 
 from colors import *
 from models import Game
+
 
 def main():
   map_width, map_height = 1000, 750
