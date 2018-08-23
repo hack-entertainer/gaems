@@ -208,8 +208,8 @@ class Game:
     mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
     self.mans = mans
 
-    # aiming
-    self.diagonal_aim_threshold = timedelta(0, 2)
+    # aiming; .2 seconds
+    self.diagonal_aim_threshold = timedelta(0, .2)
 
     # objects fired by player
     self.missiles = []
@@ -266,11 +266,9 @@ class Game:
           aim = diagonal_aims[last][second2last]
           break
     else:
-      # if 1 key down, aim that way
+      # aim defaults to last key pressed, but if diagonal,
+      # account for two keys recently released
       last = up[0]
-      # aim = aims[last]
-
-      # if 2 or more, aim according to last two horizontal, vertical keys pressed
       for second2last in up[1:]:
         if second2last in diagonal_pairs[last] and \
             keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
