@@ -209,7 +209,7 @@ class Game:
     self.mans = mans
 
     # aiming
-    self.diagonal_aim_threshold = timedelta(0, .33)
+    self.diagonal_aim_threshold = timedelta(0, 2)
 
     # objects fired by player
     self.missiles = []
@@ -230,8 +230,9 @@ class Game:
     # yay, context
     up.sort(key=lambda button: keyboard[button]['state'])
     down.sort(key=lambda button: keyboard[button]['state'])
+
     # radians
-    aim = self.mans.aim
+    aim = self.mans.aim / pi
 
     aims = {
       SDLK_w: 1 / 2,
@@ -254,29 +255,29 @@ class Game:
     }
 
     # if any keys down, aim based on those
-    # if len(down) > 0:
-    #   # if 1 key down, aim that way
-    #   last = down[0]
-    #   aim = aims[last]
-    #
-    #   # if 2 or more, aim according to last two horizontal, vertical keys pressed
-    #   for second2last in down[1:]:
-    #     if second2last in diagonal_pairs[last] and \
-    #         keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
-    #       aim = diagonal_aims[last][second2last]
-    #       break
-    # else:
-    if len(down) is 0:
+    if len(down) > 0:
       # if 1 key down, aim that way
-      last = up[0]
+      last = down[0]
       aim = aims[last]
 
       # if 2 or more, aim according to last two horizontal, vertical keys pressed
-      for second2last in up[1:]:
+      for second2last in down[1:]:
         if second2last in diagonal_pairs[last] and \
             keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
           aim = diagonal_aims[last][second2last]
           break
+    # else:
+    # if len(down) is 0:
+    #   # if 1 key down, aim that way
+    #   last = up[0]
+    #   aim = aims[last]
+    #
+    #   # if 2 or more, aim according to last two horizontal, vertical keys pressed
+    #   for second2last in up[1:]:
+    #     if second2last in diagonal_pairs[last] and \
+    #         keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
+    #       aim = diagonal_aims[last][second2last]
+    #       break
 
     return aim * pi
 
@@ -286,7 +287,6 @@ class Game:
 
     # handle man updates
     mans = self.mans
-    keyboard = self.keyboard
     if event.type == SDL_KEYDOWN:
 
       # update man's movement and state
@@ -340,7 +340,7 @@ class Game:
 
     For now, just use Euclidean distance between spheres to determine collision.
     TODO -- implement SAT but mayyyybe bake your own simple one based on testing each side
-    TODO -- move into Geometry class
+    TODO -- move into Geometry class -- eventually implement/import physics and *gasp* chemistry!!?
     '''
 
     return o1.size + o2.size >= sqrt(
