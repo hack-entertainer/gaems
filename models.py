@@ -227,8 +227,8 @@ class Game:
     up = [key for key in keys if keyboard.setdefault(key, {'state': 'up', 'time': datetime.now()})['state'] is 'up']
     down = [key for key in keys if keyboard[key]['state'] is 'down']
     # yay, context
-    up.sort(key=lambda button: keyboard[button]['state'])
-    down.sort(key=lambda button: keyboard[button]['state'])
+    up.sort(key=lambda button: keyboard[button]['time'], reverse=True)
+    down.sort(key=lambda button: keyboard[button]['time'])
 
     # radians
     aim = self.mans.aim / pi
@@ -268,7 +268,7 @@ class Game:
     else:
       # if 1 key down, aim that way
       last = up[0]
-      aim = aims[last]
+      # aim = aims[last]
 
       # if 2 or more, aim according to last two horizontal, vertical keys pressed
       for second2last in up[1:]:
@@ -276,6 +276,7 @@ class Game:
             keyboard[last]['time'] - keyboard[second2last]['time'] < self.diagonal_aim_threshold:
           aim = diagonal_aims[last][second2last]
           break
+      pass
 
     return aim * pi
 
