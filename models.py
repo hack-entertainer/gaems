@@ -370,7 +370,7 @@ class Game:
       # fire bullet at correct frequency
       if datetime.now() - mans.last_fire >= mans.fire_rate:
         missiles.append(Bullet(
-          self.brush, 5, BLUE, lifespan=timedelta(0, .5), location=Point(mans.location.x, mans.location.y),
+          self.brush, 25, RED, lifespan=timedelta(0, .5), location=Point(mans.location.x, mans.location.y),
           velocity=(1.5, mans.aim)
         ))
         mans.last_fire = datetime.now()
