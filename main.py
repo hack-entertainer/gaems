@@ -37,7 +37,7 @@ def main():
   # main_loop
   event = SDL_Event()
 
-  game = Game(renderer, map_width, map_height)
+  game = Game(renderer, map_width, map_height, max_goals=5, goal_target=20)
 
   BKGRND = NIGHTFALL
 

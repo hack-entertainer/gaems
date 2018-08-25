@@ -235,7 +235,7 @@ class Game:
   and win conditions
   """
 
-  def __init__(self, renderer, map_width, map_height):
+  def __init__(self, renderer, map_width, map_height, max_goals=1, goal_target=1 ):
     self.ongoing = True
     self.brush = Brush(renderer)
     self.pen = Pen(renderer)
@@ -255,6 +255,9 @@ class Game:
     self.missiles = []
 
     self.goals = []
+    self.max_goals = max_goals
+    self.goals_achieved = 0
+    self.goal_target = goal_target
 
     # villains
     self.villains = []
