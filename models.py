@@ -18,7 +18,7 @@ from sdl2 import (
   SDLK_SPACE,
 )
 
-from utils import Point, Pen, Brush
+from utils import Point, Pen, Brush, Geometry
 from colors import *
 
 
@@ -147,7 +147,7 @@ class TriangleMan(Triangle):
 
   '''
 
-  def __init__(self, brush, size, color, location=None, x_velo=0, y_velo=0, max_velo=0):
+  def __init__(self, brush, size, color, hp=1, location=None, x_velo=0, y_velo=0, max_velo=0):
     """
     brush -- Brush()
     size -- int
@@ -155,6 +155,8 @@ class TriangleMan(Triangle):
     location -- Point()
     """
     super(TriangleMan, self).__init__(brush, size, color, location=location)
+
+    self.hp = hp
 
     # for movement
     self.x_velo = x_velo
@@ -203,7 +205,7 @@ class Bullet(Triangle):
 
 
 class Enemy(Square):
-  def __init__(self, brush, size, color, location=None, hp=1):
+  def __init__(self, brush, size, color, target, max_speed=3, location=None, power=1, hp=1):
     """
     brush -- Brush()
     size -- int
@@ -214,7 +216,11 @@ class Enemy(Square):
     super(Enemy, self).__init__(brush, size, color, location=location)
 
     self.hp = hp
+    self.power = power
+    self.max_speed = 3
     self.velocity = 0, 0
+
+    self.target = target
 
   def act(self):
     '''
@@ -222,12 +228,16 @@ class Enemy(Square):
     '''
 
     # shoot 'em if you got 'em
-    # todo
+    # todog
 
     # set new velocity based on position of mans
-    # todo
+    self.set_velocity()
 
     self.move()
+
+  def set_velocity(self):
+    direction = Geometry.angle(self.location, self.target.location)
+    raise Exception('not implemeted; been grinding hard')
 
 
 class Game:
@@ -246,7 +256,7 @@ class Game:
     # keyboard state
     self.keyboard = {}
 
-    mans = TriangleMan(self.brush, 15, HEATWAVE, location=Point(25, 25))
+    mans = TriangleMan(self.brush, 15, HEATWAVE, hp=5, location=Point(25, 25))
     self.mans = mans
 
     # aiming; .2 seconds
@@ -281,6 +291,8 @@ class Game:
     )
 
   def collisions(self):
+    # todo -- convert into regions and do collisions on all items therein
+
     # mans and goals
     mans = self.mans
     goals = self.goals
@@ -301,9 +313,13 @@ class Game:
           enemy.hp -= bullet.power
 
     # enemies and mans
+    for enemy in enemies:
+      if self.collision(enemy, mans):
+        mans.hp -= enemy.power
+        enemy.hp = 0
 
-    # todo -- convert into regions and do collisions on all items therein
-    pass
+    if mans.hp < 1:
+      self.ongoing = False
 
   def compute_aim(self):
     '''
@@ -435,6 +451,8 @@ class Game:
     '''
     update game asset states
     '''
+    # sugar
+    mans = self.mans
 
     ## VILLAIN CREW ##
 
@@ -444,44 +462,43 @@ class Game:
     while len(villains) < 15:
       villains.append(
         Enemy(
-          self.brush, 18, GREEN,
+          self.brush, 18, GREEN, target=mans,
           location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
       )
 
-    for v in villains:
-      v.act()
+      for v in villains:
+        v.act()
 
-    self.enemies = villains
-    ## END VILLAIN ##
+      self.enemies = villains
+      ## END VILLAIN ##
 
-    # move missiles
-    missiles = self.bullets
-    for missile in self.bullets:
-      missile.move()
+      # move missiles
+      missiles = self.bullets
+      for missile in self.bullets:
+        missile.move()
 
-    mans = self.mans
-    mans.move()
-    if mans.firing:
-      # fire bullet at correct frequency
-      if datetime.now() - mans.last_fire >= mans.fire_rate:
-        missiles.append(Bullet(
-          self.brush, 25, RED, lifespan=timedelta(0, .5), location=Point(mans.location.x, mans.location.y),
-          velocity=(1.5, mans.aim)
-        ))
-        mans.last_fire = datetime.now()
+      mans.move()
+      if mans.firing:
+        # fire bullet at correct frequency
+        if datetime.now() - mans.last_fire >= mans.fire_rate:
+          missiles.append(Bullet(
+            self.brush, 25, RED, lifespan=timedelta(0, .5), location=Point(mans.location.x, mans.location.y),
+            velocity=(1.5, mans.aim)
+          ))
+          mans.last_fire = datetime.now()
 
-    # delet exppired missiles
-    for i in reversed(range(len(missiles))):
-      if datetime.now() - missiles[i].creation > missiles[i].lifespan:
-        missiles.pop(i)
+      # delet exppired missiles
+      for i in reversed(range(len(missiles))):
+        if datetime.now() - missiles[i].creation > missiles[i].lifespan:
+          missiles.pop(i)
 
-    goals = self.goals
-    while len(goals) < self.max_goals and self.goals_achieved < self.goal_target:
-      goals.append(
-        Square(self.brush, 18, HEATWAVE,
-               location=Point(
-                 rn.randint(0, self.m_width),
-                 rn.randint(0, self.m_height)))
-      )
+      goals = self.goals
+      while len(goals) < self.max_goals and self.goals_achieved < self.goal_target:
+        goals.append(
+          Square(self.brush, 18, HEATWAVE,
+                 location=Point(
+                   rn.randint(0, self.m_width),
+                   rn.randint(0, self.m_height)))
+        )
 
-    self.collisions()
+      self.collisions()

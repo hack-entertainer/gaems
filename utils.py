@@ -83,3 +83,15 @@ class Geometry:
   @classmethod
   def distance(cls, p1, p2):
     pass
+
+  @classmethod
+  def angle_between(cls, p1, p2):
+    '''
+    return angle, in radians, between p1 and p2
+
+    p1, p2 -- Point(), Point()
+    '''
+    x = p2.x - p1.x
+    y = p2.y - p1.y
+
+    raise Exception('not implemeted; get some sleep')
