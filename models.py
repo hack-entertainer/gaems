@@ -236,7 +236,7 @@ class Enemy(Square):
     self.move()
 
   def set_velocity(self):
-    direction = Geometry.angle(self.location, self.target.location)
+    direction = Geometry.angle_between(self.location, self.target.location)
     raise Exception('not implemeted; been grinding hard')
 
 
@@ -256,15 +256,17 @@ class Game:
     # keyboard state
     self.keyboard = {}
 
+    # protagonist
     mans = TriangleMan(self.brush, 15, HEATWAVE, hp=5, location=Point(25, 25))
     self.mans = mans
 
-    # aiming; .2 seconds
+    # aiming; .2 second threshold
     self.diagonal_aim_threshold = timedelta(0, .2)
 
     # objects fired by player
     self.bullets = []
 
+    # objectives
     self.goals = []
     self.max_goals = max_goals
     self.goals_achieved = 0
