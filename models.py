@@ -253,7 +253,7 @@ class Game:
     self.diagonal_aim_threshold = timedelta(0, .2)
 
     # objects fired by player
-    self.bullet = []
+    self.bullets = []
 
     self.goals = []
     self.max_goals = max_goals
@@ -296,7 +296,7 @@ class Game:
     # bullets and enemies
     enemies = self.enemies
     for enemy in enemies:
-      for bullet in self.bullet:
+      for bullet in self.bullets:
         if self.collision(bullet, enemy):
           enemy.hp -= bullet.power
 
@@ -425,7 +425,7 @@ class Game:
     for goal in self.goals:
       goal.draw()
 
-    for missile in self.bullet:
+    for missile in self.bullets:
       missile.draw()
 
     for v in self.enemies:
@@ -441,7 +441,7 @@ class Game:
     villains = [enemy for enemy in self.enemies if enemy.hp > 0]
 
     # spawn
-    while len(villains) < 5:
+    while len(villains) < 15:
       villains.append(
         Enemy(
           self.brush, 18, GREEN,
@@ -455,8 +455,8 @@ class Game:
     ## END VILLAIN ##
 
     # move missiles
-    missiles = self.bullet
-    for missile in missiles:
+    missiles = self.bullets
+    for missile in self.bullets:
       missile.move()
 
     mans = self.mans
