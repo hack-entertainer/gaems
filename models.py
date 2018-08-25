@@ -182,7 +182,7 @@ class Bullet(Triangle):
 
   '''
 
-  def __init__(self, brush, size, color, location=None, lifespan=timedelta(0, .25), velocity=(1, 90)):
+  def __init__(self, brush, size, color, location=None, power=1, lifespan=timedelta(0, .25), velocity=(1, 90)):
     """
     brush -- Brush()
     size -- int
@@ -192,6 +192,7 @@ class Bullet(Triangle):
     """
     super(Bullet, self).__init__(brush, size, color, location=location)
 
+    self.power = power
     self.lifespan = lifespan
     self.creation = datetime.now()
     self.velocity = velocity
@@ -201,7 +202,7 @@ class Bullet(Triangle):
     self.calc_points()
 
 
-class Villain(Square):
+class Enemy(Square):
   def __init__(self, brush, size, color, location=None, hp=1):
     """
     brush -- Brush()
@@ -210,7 +211,7 @@ class Villain(Square):
     location -- Point()
     velocity -- tuple(['speed', 'direction as degrees of a circle'])
     """
-    super(Villain, self).__init__(brush, size, color, location=location)
+    super(Enemy, self).__init__(brush, size, color, location=location)
 
     self.hp = hp
     self.velocity = 0, 0
@@ -235,7 +236,7 @@ class Game:
   and win conditions
   """
 
-  def __init__(self, renderer, map_width, map_height, max_goals=1, goal_target=1 ):
+  def __init__(self, renderer, map_width, map_height, max_goals=1, goal_target=1):
     self.ongoing = True
     self.brush = Brush(renderer)
     self.pen = Pen(renderer)
@@ -252,7 +253,7 @@ class Game:
     self.diagonal_aim_threshold = timedelta(0, .2)
 
     # objects fired by player
-    self.missiles = []
+    self.bullet = []
 
     self.goals = []
     self.max_goals = max_goals
@@ -260,7 +261,24 @@ class Game:
     self.goal_target = goal_target
 
     # villains
-    self.villains = []
+    self.enemies = []
+
+  @classmethod
+  def collision(cls, o1, o2):
+    '''
+
+    :param o1: a game object
+    :param o2: another game object
+    :return: True if they collide
+
+    For now, just use Euclidean distance between spheres to determine collision.
+    TODO -- implement SAT but mayyyybe bake your own simple one based on testing each side
+    TODO -- move into Geometry class -- eventually implement/import physics and *gasp* chemistry!!?
+    '''
+
+    return o1.size + o2.size >= sqrt(
+      (o1.location.x - o2.location.x) ** 2 + (o1.location.y - o2.location.y) ** 2
+    )
 
   def collisions(self):
     # mans and goals
@@ -270,11 +288,17 @@ class Game:
     for t in reversed(range(len(goals))):
       if self.collision(mans, goals[t]):
         goals.pop(t)
+        self.goals_achieved += 1
 
     if len(goals) is 0:
       self.ongoing = False
 
     # bullets and enemies
+    enemies = self.enemies
+    for enemy in enemies:
+      for bullet in self.bullet:
+        if self.collision(bullet, enemy):
+          enemy.hp -= bullet.power
 
     # enemies and mans
 
@@ -392,23 +416,6 @@ class Game:
         self.keyboard[event.key.keysym.sym] = {'state': 'up', 'time': datetime.now()}
         mans.aim = self.compute_aim()
 
-  @classmethod
-  def collision(cls, o1, o2):
-    '''
-
-    :param o1: a game object
-    :param o2: another game object
-    :return: True if they collide
-
-    For now, just use Euclidean distance between spheres to determine collision.
-    TODO -- implement SAT but mayyyybe bake your own simple one based on testing each side
-    TODO -- move into Geometry class -- eventually implement/import physics and *gasp* chemistry!!?
-    '''
-
-    return o1.size + o2.size >= sqrt(
-      (o1.location.x - o2.location.x) ** 2 + (o1.location.y - o2.location.y) ** 2
-    )
-
   def draw(self):
     '''
     draw game assets
@@ -418,10 +425,10 @@ class Game:
     for goal in self.goals:
       goal.draw()
 
-    for missile in self.missiles:
+    for missile in self.bullet:
       missile.draw()
 
-    for v in self.villains:
+    for v in self.enemies:
       v.draw()
 
   def update(self):
@@ -430,22 +437,25 @@ class Game:
     '''
 
     ## VILLAIN CREW ##
-    villains = self.villains
+
+    villains = [enemy for enemy in self.enemies if enemy.hp > 0]
 
     # spawn
-    while len(self.villains) < 5:
+    while len(villains) < 5:
       villains.append(
-        Villain(
+        Enemy(
           self.brush, 18, GREEN,
           location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
       )
 
     for v in villains:
       v.act()
+
+    self.enemies = villains
     ## END VILLAIN ##
 
     # move missiles
-    missiles = self.missiles
+    missiles = self.bullet
     for missile in missiles:
       missile.move()
 
