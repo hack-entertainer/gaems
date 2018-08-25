@@ -254,13 +254,22 @@ class Game:
     # objects fired by player
     self.missiles = []
 
-    self.goal_square = Square(self.brush, 8, HEATWAVE, location=Point(round(map_width * .75), round(map_height * .75)))
+    self.goals = []
 
     # villains
     self.villains = []
 
   def collisions(self):
     # mans and goals
+    mans = self.mans
+    goals = self.goals
+
+    for t in reversed(range(len(goals))):
+      if self.collision(mans, goals[t]):
+        goals.pop(t)
+
+    if len(goals) is 0:
+      self.ongoing = False
 
     # bullets and enemies
 
@@ -402,7 +411,9 @@ class Game:
     draw game assets
     '''
     self.mans.draw()
-    self.goal_square.draw()
+
+    for goal in self.goals:
+      goal.draw()
 
     for missile in self.missiles:
       missile.draw()
@@ -446,9 +457,18 @@ class Game:
         ))
         mans.last_fire = datetime.now()
 
-    # delete pxpired missiles
+    # delet exppired missiles
     for i in reversed(range(len(missiles))):
       if datetime.now() - missiles[i].creation > missiles[i].lifespan:
         missiles.pop(i)
 
-    self.collision()
+    goals = self.goals
+    while len(goals) < self.max_goals and self.goals_achieved < self.goal_target:
+      goals.append(
+        Square(self.brush, 18, HEATWAVE,
+               location=Point(
+                 rn.randint(0, self.m_width),
+                 rn.randint(0, self.m_height)))
+      )
+
+    self.collisions()
