@@ -1,4 +1,4 @@
-import ctypes
+import random as rn
 
 from datetime import datetime, timedelta
 from math import sqrt, sin, cos, pi
@@ -11,13 +11,11 @@ from sdl2 import (
   SDL_QUIT,
   SDL_KEYDOWN,
   SDL_KEYUP,
-  SDL_MOUSEBUTTONUP,
   SDLK_UP,
   SDLK_DOWN,
   SDLK_LEFT,
   SDLK_RIGHT,
   SDLK_SPACE,
-  SDL_GetMouseState
 )
 
 from utils import Point, Pen, Brush
@@ -105,7 +103,45 @@ class Square(GameObject):
     ]
 
 
-class TriangleMan(GameObject):
+class Triangle(GameObject):
+  def __init__(self, brush, size, color, location=None, x_velo=0, y_velo=0, max_velo=0):
+    """
+    brush -- Brush()
+    size -- int
+    color -- RGB tuple good for sdl
+    location -- Point()
+    """
+    super(Triangle, self).__init__(brush, size, color, location=location)
+
+    # for movement
+    self.x_velo = x_velo
+    self.y_velo = y_velo
+    self.max_velo = max_velo
+
+    # read, fire, aim
+    self.fire_rate = timedelta(0, .125)
+    self.last_fire = datetime.now()
+    self.firing = False
+    self.aim = 3 / 2 * pi
+
+    # define points, left, middle, right
+    self.height = sqrt(size ** 2 - (size ** 2 / 4))
+    self.calc_points()
+
+  def calc_points(self):
+    '''
+    draw points
+    :return:
+    '''
+    location, size, height = self.location, self.size, self.height
+    self.points = [
+      Point(location.x - size / 2, round(location.y + 1 / 3 * height)),
+      Point(location.x, round(location.y - (2 / 3 * height))),
+      Point(location.x + size / 2, round(location.y + 1 / 3 * height))
+    ]
+
+
+class TriangleMan(Triangle):
   '''
   a triangle-shaped man
 
@@ -135,24 +171,12 @@ class TriangleMan(GameObject):
     self.height = sqrt(size ** 2 - (size ** 2 / 4))
     self.calc_points()
 
-  def calc_points(self):
-    '''
-    draw points
-    :return:
-    '''
-    location, size, height = self.location, self.size, self.height
-    self.points = [
-      Point(location.x - size / 2, round(location.y + 1 / 3 * height)),
-      Point(location.x, round(location.y - (2 / 3 * height))),
-      Point(location.x + size / 2, round(location.y + 1 / 3 * height))
-    ]
-
   def move(self):
     self.location.x += self.x_velo
     self.location.y += self.y_velo
 
 
-class Bullet(GameObject):
+class Bullet(Triangle):
   '''
   a triangleman-like object
 
@@ -176,17 +200,33 @@ class Bullet(GameObject):
     self.height = sqrt(size ** 2 - (size ** 2 / 4))
     self.calc_points()
 
-  def calc_points(self):
+
+class Villain(Square):
+  def __init__(self, brush, size, color, location=None, hp=1):
+    """
+    brush -- Brush()
+    size -- int
+    color -- RGB tuple good for sdl
+    location -- Point()
+    velocity -- tuple(['speed', 'direction as degrees of a circle'])
+    """
+    super(Villain, self).__init__(brush, size, color, location=location)
+
+    self.hp = hp
+    self.velocity = 0, 0
+
+  def act(self):
     '''
-    draw points
-    :return:
+    decide what to do next
     '''
-    location, size, height = self.location, self.size, self.height
-    self.points = [
-      Point(location.x - size / 2, round(location.y + 1 / 3 * height)),
-      Point(location.x, round(location.y - (2 / 3 * height))),
-      Point(location.x + size / 2, round(location.y + 1 / 3 * height))
-    ]
+
+    # shoot 'em if you got 'em
+    # todo
+
+    # set new velocity based on position of mans
+    # todo
+
+    self.move()
 
 
 class Game:
@@ -215,6 +255,19 @@ class Game:
     self.missiles = []
 
     self.goal_square = Square(self.brush, 8, HEATWAVE, location=Point(round(map_width * .75), round(map_height * .75)))
+
+    # villains
+    self.villains = []
+
+  def collisions(self):
+    # mans and goals
+
+    # bullets and enemies
+
+    # enemies and mans
+
+    # todo -- convert into regions and do collisions on all items therein
+    pass
 
   def compute_aim(self):
     '''
@@ -354,10 +407,28 @@ class Game:
     for missile in self.missiles:
       missile.draw()
 
+    for v in self.villains:
+      v.draw()
+
   def update(self):
     '''
     update game asset states
     '''
+
+    ## VILLAIN CREW ##
+    villains = self.villains
+
+    # spawn
+    while len(self.villains) < 5:
+      villains.append(
+        Villain(
+          self.brush, 18, GREEN,
+          location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
+      )
+
+    for v in villains:
+      v.act()
+    ## END VILLAIN ##
 
     # move missiles
     missiles = self.missiles
@@ -375,10 +446,9 @@ class Game:
         ))
         mans.last_fire = datetime.now()
 
-    # delete expired missiles
+    # delete pxpired missiles
     for i in reversed(range(len(missiles))):
       if datetime.now() - missiles[i].creation > missiles[i].lifespan:
         missiles.pop(i)
 
-    if self.collision(mans, self.goal_square):
-      self.ongoing = False
+    self.collision()
