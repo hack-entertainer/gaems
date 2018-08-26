@@ -22,7 +22,7 @@ from utils import Point, Pen, Brush, Geometry
 from colors import *
 
 
-class GameObject(object):
+class GameObject:
   '''
   repository for generic object attributes
   '''
@@ -59,8 +59,12 @@ class GameObject(object):
     x_dist = speed * cos(angle)  # CAH
     y_dist = speed * sin(angle)  # SOH
 
-    # use reflection for quadrants II-IV
     # todo -- convert from degrees to radians here; works now but... it shouldn't >:/
+    # compute aim returns aim in degrees which is why this
+    # works for bullets but not for other objects
+    # todo -- end
+
+    # use reflection for quadrants II-IV
     if 90 <= angle <= 180:
       x_dist *= -1
     elif 180 <= angle <= 270:
@@ -217,7 +221,7 @@ class Enemy(Square):
 
     self.hp = hp
     self.power = power
-    self.max_speed = 3
+    self.max_speed = max_speed
     self.velocity = 0, 0
 
     self.target = target
@@ -231,13 +235,14 @@ class Enemy(Square):
     # todog
 
     # set new velocity based on position of mans
+    return
     self.set_velocity()
 
     self.move()
 
   def set_velocity(self):
     direction = Geometry.angle_between(self.location, self.target.location)
-    raise Exception('not implemeted; been grinding hard')
+    self.velocity = self.max_speed, direction
 
 
 class Game:
@@ -474,33 +479,33 @@ class Game:
       self.enemies = villains
       ## END VILLAIN ##
 
-      # move missiles
-      missiles = self.bullets
-      for missile in self.bullets:
-        missile.move()
+    # move missiles
+    missiles = self.bullets
+    for missile in self.bullets:
+      missile.move()
 
-      mans.move()
-      if mans.firing:
-        # fire bullet at correct frequency
-        if datetime.now() - mans.last_fire >= mans.fire_rate:
-          missiles.append(Bullet(
-            self.brush, 25, RED, lifespan=timedelta(0, .5), location=Point(mans.location.x, mans.location.y),
-            velocity=(1.5, mans.aim)
-          ))
-          mans.last_fire = datetime.now()
+    mans.move()
+    if mans.firing:
+      # fire bullet at correct frequency
+      if datetime.now() - mans.last_fire >= mans.fire_rate:
+        missiles.append(Bullet(
+          self.brush, 25, RED, lifespan=timedelta(0, .5), location=Point(mans.location.x, mans.location.y),
+          velocity=(1.5, mans.aim)
+        ))
+        mans.last_fire = datetime.now()
 
-      # delet exppired missiles
-      for i in reversed(range(len(missiles))):
-        if datetime.now() - missiles[i].creation > missiles[i].lifespan:
-          missiles.pop(i)
+    # delet exppired missiles
+    for i in reversed(range(len(missiles))):
+      if datetime.now() - missiles[i].creation > missiles[i].lifespan:
+        missiles.pop(i)
 
-      goals = self.goals
-      while len(goals) < self.max_goals and self.goals_achieved < self.goal_target:
-        goals.append(
-          Square(self.brush, 18, HEATWAVE,
-                 location=Point(
-                   rn.randint(0, self.m_width),
-                   rn.randint(0, self.m_height)))
-        )
+    goals = self.goals
+    while len(goals) < self.max_goals and self.goals_achieved < self.goal_target:
+      goals.append(
+        Square(self.brush, 18, HEATWAVE,
+               location=Point(
+                 rn.randint(0, self.m_width),
+                 rn.randint(0, self.m_height)))
+      )
 
-      self.collisions()
+    self.collisions()
