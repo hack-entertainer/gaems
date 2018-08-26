@@ -1,4 +1,6 @@
 import os
+
+from math import atan, pi
 from os import path
 
 from sdl2 import *
@@ -94,4 +96,28 @@ class Geometry:
     x = p2.x - p1.x
     y = p2.y - p1.y
 
+    # todo account for x == 0 || y == 0 when the exception occurs
+
+    # assume quadrant I
+    # SOH CAH *TOA*
+    angle = atan(abs(x / y))
+
+    # for reflection
+    arc2y_axis = pi / 2 - angle
+    arc2x_axis = pi / 2 - arc2y_axis
+
+    # quadrants II-IV
+    if x < 0 and y >= 0:
+      # II
+      angle += 2 * arc2y_axis
+    elif x < 0 and y < 0:
+      # III
+      angle += 2 * arc2y_axis + 2 * arc2x_axis
+    elif x >= 0 and y < 0:
+      # IV
+      angle += 4 * arc2y_axis + 2 * arc2x_axis
+
+    # if y negative, reflect across x axis
+
     raise Exception('not implemeted; get some sleep')
+    return angle
