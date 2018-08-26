@@ -222,7 +222,7 @@ class Bullet(Triangle):
 
 
 class Enemy(Square):
-  def __init__(self, brush, size, color, target, max_speed=.5, location=None, power=1, hp=1):
+  def __init__(self, brush, size, color, target, max_speed=.3, location=None, power=1, hp=1):
     """
     brush -- Brush()
     size -- int
