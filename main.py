@@ -37,7 +37,7 @@ def main():
   # main_loop
   event = SDL_Event()
 
-  game = Arcadia(renderer, map_width, map_height, max_enemies=0, max_goals=2, goal_target=5)
+  game = Arcadia(renderer, map_width, map_height, max_enemies=1, max_goals=2, goal_target=5)
 
   BKGRND = NIGHTFALL
 
@@ -53,7 +53,7 @@ def main():
     SDL_RenderClear(renderer)
 
     # draw my stuff
-    game.draw()
+    game.draw_game_objects()
 
     SDL_RenderPresent(renderer)
 

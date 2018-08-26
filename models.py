@@ -44,7 +44,6 @@ class GameObject:
     draw myself
     '''
     # draw them using brush
-    self.calc_points()
     self.brush.poly(self.points, self.color)
 
   def move(self):
@@ -77,6 +76,8 @@ class GameObject:
     self.location.x += x_dist
     self.location.y += y_dist
 
+    self.calc_points()
+
   def _move(self):
     '''
     use velocity to calculate new location
@@ -89,6 +90,8 @@ class GameObject:
 
     self.location.x += x_dist
     self.location.y += y_dist
+
+    self.calc_points()
 
 
 class Square(GameObject):
@@ -191,8 +194,10 @@ class TriangleMan(Triangle):
     self.calc_points()
 
   def move(self):
+    # todo -- have man use base move method
     self.location.x += self.x_velo
     self.location.y += self.y_velo
+    self.calc_points()
 
 
 class Bullet(Triangle):
@@ -222,7 +227,7 @@ class Bullet(Triangle):
 
 
 class Enemy(Square):
-  def __init__(self, brush, size, color, target, max_speed=.3, location=None, power=1, hp=1):
+  def __init__(self, brush, size, color, target, max_speed=.3, location=None, power=0, hp=1):
     """
     brush -- Brush()
     size -- int
@@ -472,20 +477,20 @@ class Arcadia(Game):
         self.keyboard[event.key.keysym.sym] = {'state': 'up', 'time': datetime.now()}
         mans.aim = self.compute_aim()
 
-  def draw(self):
+  def draw_game_objects(self):
     '''
     draw game assets
     '''
-    self.mans.draw()
+    self.brush.poly(self.mans.points, self.mans.color)
 
     for goal in self.goals:
-      goal.draw()
+      self.brush.poly(goal.points, goal.color)
 
     for missile in self.bullets:
-      missile.draw()
+      self.brush.poly(missile.points, missile.color)
 
     for v in self.enemies:
-      v.draw()
+      self.brush.poly(v.points, v.color)
 
   def update(self):
     '''
@@ -502,7 +507,7 @@ class Arcadia(Game):
     while len(villains) < self.max_enemies:
       villains.append(
         Enemy(
-          self.brush, 18, GREEN, target=mans,
+          self.brush, 18, GREEN, target=mans, power=0,
           location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
       )
 

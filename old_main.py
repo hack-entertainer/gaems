@@ -67,7 +67,7 @@ def main():
     SDL_SetRenderDrawColor(renderer, *BKGRND, SDL_ALPHA_OPAQUE)
     SDL_RenderClear(renderer)
 
-    map.draw(PARADISE)
+    map.draw_game_objects(PARADISE)
 
     # draw mans
     mans.draw()
