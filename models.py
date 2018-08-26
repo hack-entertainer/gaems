@@ -77,6 +77,19 @@ class GameObject:
     self.location.x += x_dist
     self.location.y += y_dist
 
+  def _move(self):
+    '''
+    use velocity to calculate new location
+    '''
+    speed, angle = self.velocity
+
+    # SOH CAH TOA
+    x_dist = speed * cos(angle)  # CAH
+    y_dist = speed * sin(angle)  # SOH
+
+    self.location.x += x_dist
+    self.location.y += y_dist
+
 
 class Square(GameObject):
   '''
@@ -209,7 +222,7 @@ class Bullet(Triangle):
 
 
 class Enemy(Square):
-  def __init__(self, brush, size, color, target, max_speed=3, location=None, power=1, hp=1):
+  def __init__(self, brush, size, color, target, max_speed=.5, location=None, power=1, hp=1):
     """
     brush -- Brush()
     size -- int
@@ -231,14 +244,13 @@ class Enemy(Square):
     decide what to do next
     '''
 
+    # todo
     # shoot 'em if you got 'em
-    # todog
 
     # set new velocity based on position of mans
-    return
     self.set_velocity()
 
-    self.move()
+    super()._move()
 
   def set_velocity(self):
     direction = Geometry.angle_between(self.location, self.target.location)
@@ -251,7 +263,7 @@ class Game:
   and win conditions
   """
 
-  def __init__(self, renderer, map_width, map_height, max_goals=1, goal_target=1):
+  def __init__(self, renderer, map_width, map_height, max_goals=1, goal_target=1, max_enemies=1):
     self.ongoing = True
     self.brush = Brush(renderer)
     self.pen = Pen(renderer)
@@ -261,6 +273,7 @@ class Game:
     # keyboard state
     self.keyboard = {}
 
+    # todo -- initial config starting to get big
     # protagonist
     mans = TriangleMan(self.brush, 15, HEATWAVE, hp=5, location=Point(25, 25))
     self.mans = mans
@@ -278,6 +291,7 @@ class Game:
     self.goal_target = goal_target
 
     # villains
+    self.max_enemies = max_enemies
     self.enemies = []
 
   @classmethod
@@ -466,18 +480,18 @@ class Game:
     villains = [enemy for enemy in self.enemies if enemy.hp > 0]
 
     # spawn
-    while len(villains) < 15:
+    while len(villains) < self.max_enemies:
       villains.append(
         Enemy(
           self.brush, 18, GREEN, target=mans,
           location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
       )
 
-      for v in villains:
-        v.act()
+    for v in villains:
+      v.act()
 
-      self.enemies = villains
-      ## END VILLAIN ##
+    self.enemies = villains
+    ## END VILLAIN ##
 
     # move missiles
     missiles = self.bullets
