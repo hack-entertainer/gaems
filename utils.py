@@ -96,7 +96,17 @@ class Geometry:
     x = p2.x - p1.x
     y = p2.y - p1.y
 
-    # todo account for x == 0 || y == 0 when the exception occurs
+    # angle is completely vertical
+    if x is 0:
+      if y is 0:
+        # same location
+        return 0
+      elif y > 0:
+        # vertically above
+        return pi / 2
+      else:
+        # vertically below
+        return 3 / 2 * pi
 
     # assume quadrant I
     # SOH CAH *TOA*
