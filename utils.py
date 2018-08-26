@@ -128,3 +128,15 @@ class Geometry:
       angle += 4 * arc2y_axis + 2 * arc2x_axis
 
     return angle
+
+  @classmethod
+  def offset(cls, points, offset=Point(0, 0)):
+    """
+    shift every point in points by offset
+    narf
+
+    :param points: [Point(), Point(), Point()...]
+    :param offset: Point()
+    :return:
+    """
+    return [Point(p.x - offset.x, p.y - offset.y) for p in points]

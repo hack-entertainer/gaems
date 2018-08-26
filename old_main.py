@@ -30,7 +30,7 @@ def main():
   map = TileMap(brush, 7, bottom, 30)
 
   # models
-  mans = TriangleMan(brush, 15, HEATWAVE, location=map.bottom.center, position=map.bottom)
+  mans = Protagonist(brush, 15, HEATWAVE, location=map.bottom.center, position=map.bottom)
   map.bottom.occupant = mans
 
   BKGRND = NIGHTFALL

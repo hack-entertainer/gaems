@@ -21,7 +21,7 @@ from sdl2 import (
 )
 
 from colors import *
-from models import Arcadia
+from models import TriangleMan
 
 
 def main():
@@ -37,7 +37,7 @@ def main():
   # main_loop
   event = SDL_Event()
 
-  game = Arcadia(renderer, map_width, map_height, max_enemies=1, max_goals=2, goal_target=5)
+  game = TriangleMan(renderer, map_width, map_height, max_enemies=1, max_goals=2, goal_target=5)
 
   BKGRND = NIGHTFALL
 

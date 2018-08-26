@@ -27,6 +27,7 @@ class GameObject:
   repository for generic object attributes
   '''
 
+  # todo remove brush from game objects
   def __init__(self, brush, size, color, location=None):
     """
     brush -- Brush()
@@ -38,13 +39,6 @@ class GameObject:
     self.size = size
     self.color = color
     self.location = location
-
-  def draw(self):
-    '''
-    draw myself
-    '''
-    # draw them using brush
-    self.brush.poly(self.points, self.color)
 
   def move(self):
     '''
@@ -161,7 +155,7 @@ class Triangle(GameObject):
     ]
 
 
-class TriangleMan(Triangle):
+class Protagonist(Triangle):
   '''
   a triangle-shaped man
 
@@ -174,7 +168,7 @@ class TriangleMan(Triangle):
     color -- RGB tuple good for sdl
     location -- Point()
     """
-    super(TriangleMan, self).__init__(brush, size, color, location=location)
+    super(Protagonist, self).__init__(brush, size, color, location=location)
 
     self.hp = hp
 
@@ -267,7 +261,7 @@ class Game:
     print("It's a meee! WaAAAAaAAaAAaaa!")
 
 
-class Arcadia(Game):
+class TriangleMan(Game):
   """
   encompases (eventually) all assets and activities within a game such as collision detection, state management,
   and win conditions
@@ -286,20 +280,21 @@ class Arcadia(Game):
     """
 
     self.ongoing = True
+
+    # graephics
     self.brush = Brush(renderer)
     self.pen = Pen(renderer)
 
-    # graephics
     self.m_width, self.m_height = map_width, map_height
     self.world_center = Point(map_width / 2, map_height / 2)
-    self.view_center = self.world_center
+    self.view_center = Point(0, 0)
 
     # keyboard state
     self.keyboard = {}
 
     # todo -- initial config starting to get big
     # protagonist
-    mans = TriangleMan(self.brush, 15, HEATWAVE, hp=5, location=Point(25, 25))
+    mans = Protagonist(self.brush, 15, HEATWAVE, hp=5, location=Point(25, 25))
     self.mans = mans
 
     # aiming; .2 second threshold
@@ -481,16 +476,14 @@ class Arcadia(Game):
     '''
     draw game assets
     '''
-    self.brush.poly(self.mans.points, self.mans.color)
+    self.brush.poly(Geometry.offset(self.mans.points, Point(0, 0)), self.mans.color)
 
-    for goal in self.goals:
-      self.brush.poly(goal.points, goal.color)
+    objects = list(self.goals)
+    objects.extend(self.bullets)
+    objects.extend(self.enemies)
 
-    for missile in self.bullets:
-      self.brush.poly(missile.points, missile.color)
-
-    for v in self.enemies:
-      self.brush.poly(v.points, v.color)
+    for o in objects:
+      self.brush.poly(Geometry.offset(o.points, self.view_center), o.color)
 
   def update(self):
     '''
@@ -527,6 +520,8 @@ class Arcadia(Game):
       self.um = datetime.now()
 
     mans.move()
+    # have the action follow the man
+    # todo -- continue here
     if mans.firing:
       # fire bullet at correct frequency
       if datetime.now() - mans.last_fire >= mans.fire_rate:
