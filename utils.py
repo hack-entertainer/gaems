@@ -88,11 +88,11 @@ class Geometry:
 
   @classmethod
   def angle_between(cls, p1, p2):
-    '''
+    """
     return angle, in radians, between p1 and p2
 
     p1, p2 -- Point(), Point()
-    '''
+    """
     x = p2.x - p1.x
     y = p2.y - p1.y
 
@@ -100,11 +100,11 @@ class Geometry:
 
     # assume quadrant I
     # SOH CAH *TOA*
-    angle = atan(abs(x / y))
+    angle = atan(abs(y / x))
 
     # for reflection
     arc2y_axis = pi / 2 - angle
-    arc2x_axis = pi / 2 - arc2y_axis
+    arc2x_axis = angle
 
     # quadrants II-IV
     if x < 0 and y >= 0:
@@ -117,7 +117,4 @@ class Geometry:
       # IV
       angle += 4 * arc2y_axis + 2 * arc2x_axis
 
-    # if y negative, reflect across x axis
-
-    raise Exception('not implemeted; get some sleep')
     return angle
