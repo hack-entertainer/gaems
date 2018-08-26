@@ -258,17 +258,36 @@ class Enemy(Square):
 
 
 class Game:
+  def __repr__(self):
+    print("It's a meee! WaAAAAaAAaAAaaa!")
+
+
+class Arcadia(Game):
   """
   encompases (eventually) all assets and activities within a game such as collision detection, state management,
   and win conditions
   """
 
   def __init__(self, renderer, map_width, map_height, max_goals=1, goal_target=1, max_enemies=1):
+    self.um = datetime.now()
+    """
+    
+    :param renderer: 
+    :param map_width: 
+    :param map_height: 
+    :param max_goals: 
+    :param goal_target: 
+    :param max_enemies: 
+    """
+
     self.ongoing = True
     self.brush = Brush(renderer)
     self.pen = Pen(renderer)
 
+    # graephics
     self.m_width, self.m_height = map_width, map_height
+    self.world_center = Point(map_width / 2, map_height / 2)
+    self.view_center = self.world_center
 
     # keyboard state
     self.keyboard = {}
@@ -497,6 +516,10 @@ class Game:
     missiles = self.bullets
     for missile in self.bullets:
       missile.move()
+
+    if datetime.now() - self.um > timedelta(0, .5):
+      print(mans.location)
+      self.um = datetime.now()
 
     mans.move()
     if mans.firing:
