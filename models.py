@@ -286,15 +286,16 @@ class TriangleMan(Game):
     self.pen = Pen(renderer)
 
     self.m_width, self.m_height = map_width, map_height
-    self.world_center = Point(map_width / 2, map_height / 2)
-    self.view_center = Point(0, 0)
+    self.map_center = Point(map_width / 2, map_height / 2)
+    self.view_center = Point(self.map_center.x, self.map_center.y)
+    self.max_distance_from_view_center = map_height / 4
 
     # keyboard state
     self.keyboard = {}
 
     # todo -- initial config starting to get big
     # protagonist
-    mans = Protagonist(self.brush, 15, HEATWAVE, hp=5, location=Point(25, 25))
+    mans = Protagonist(self.brush, 15, HEATWAVE, hp=5, location=Point(self.map_center.x, self.map_center.y))
     self.mans = mans
 
     # aiming; .2 second threshold
@@ -482,8 +483,11 @@ class TriangleMan(Game):
     objects.extend(self.bullets)
     objects.extend(self.enemies)
 
+    # for o in objects:
+    #   self.brush.poly(Geometry.offset(o.points, self.view_center), o.color)
+
     for o in objects:
-      self.brush.poly(Geometry.offset(o.points, self.view_center), o.color)
+      self.brush.poly(o.points, o.color)
 
   def update(self):
     '''
@@ -520,6 +524,22 @@ class TriangleMan(Game):
       self.um = datetime.now()
 
     mans.move()
+
+    # adjust view center
+    v_center = self.view_center
+    # horizontal
+    if abs(mans.location.x - v_center.x) > self.max_distance_from_view_center:
+      # mans to left of view center
+      v_center.x = mans.location.x - self.max_distance_from_view_center
+      if mans.location.x < v_center.x:
+        # mans to right
+        v_center.x = mans.location.x + self.max_distance_from_view_center
+
+    print("mans: {} -- view center: {}".format(mans.location, self.view_center))
+
+    # vertical
+    # todo
+
     # have the action follow the man
     # todo -- continue here
     if mans.firing:
