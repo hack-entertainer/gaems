@@ -281,6 +281,41 @@ class Game:
       (o1.location.x - o2.location.x) ** 2 + (o1.location.y - o2.location.y) ** 2
     )
 
+  def adjust_view(self):
+    # adjust view center
+    v_center = self.view_center
+    mans = self.mans
+    max_distance = self.max_distance_from_view_center
+
+    # horizontal
+    if abs(mans.location.x - v_center.x) > max_distance:
+      if mans.location.x < v_center.x:
+        # mans to right
+        v_center.x = mans.location.x + max_distance
+      else:
+        # mans to left of view center
+        v_center.x = mans.location.x - max_distance
+
+    # vertical
+    if abs(mans.location.y - v_center.y) > max_distance:
+      if mans.location.y < v_center.y:
+        # mans to right
+        v_center.y = mans.location.y + max_distance
+      else:
+        # mans to left of view center
+        v_center.y = mans.location.y - max_distance
+
+  def draw_game_objects(self):
+    '''
+    draw game assets
+    '''
+    mc = self.map_center
+    vc = self.view_center
+    for o in self.game_objects:
+      # adjust drawing position to account or viewport position
+      points = [Point(p.x + (mc.x - vc.x), p.y + (mc.y - vc.y)) for p in o.points]
+      self.brush.poly(points, o.color)
+
 
 class TriangleMan(Game):
   """
@@ -334,6 +369,8 @@ class TriangleMan(Game):
     # villains
     self.max_enemies = max_enemies
     self.enemies = []
+
+    self.game_objects = [mans]
 
   def adjust_view(self):
     # adjust view center
@@ -501,26 +538,6 @@ class TriangleMan(Game):
         self.keyboard[event.key.keysym.sym] = {'state': 'up', 'time': datetime.now()}
         mans.aim = self.compute_aim()
 
-  def draw_game_objects(self):
-    '''
-    draw game assets
-    '''
-    # self.brush.poly(Geometry.offset(self.mans.points, Point(0, 0)), self.mans.color)
-
-    objects = [self.mans]
-    objects.extend(self.bullets)
-    objects.extend(self.enemies)
-    objects.extend(self.goals)
-
-    # for o in objects:
-    #   self.brush.poly(o.points, o.color)
-
-    mc = self.map_center
-    vc = self.view_center
-    for o in objects:
-      points = [Point(p.x + (mc.x - vc.x), p.y + (mc.y - vc.y)) for p in o.points]
-      self.brush.poly(points, o.color)
-
   def update(self):
     '''
     update game asset states
@@ -584,3 +601,9 @@ class TriangleMan(Game):
       )
 
     self.collisions()
+
+    # update list of game objects
+    self.game_objects = [mans]
+    self.game_objects.extend(missiles)
+    self.game_objects.extend(villains)
+    self.game_objects.extend(goals)
