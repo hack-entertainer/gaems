@@ -422,7 +422,7 @@ class TriangleMan(Game):
     self.max_enemies = max_enemies
     self.enemies = []
 
-    self.game_objects = [mans]
+    self.drawables = [mans]
 
   def adjust_view(self):
     # adjust view center
@@ -654,7 +654,7 @@ class TriangleMan(Game):
     self.collisions()
 
     # update list of game objects
-    self.game_objects = [mans]
-    self.game_objects.extend(missiles)
-    self.game_objects.extend(villains)
-    self.game_objects.extend(goals)
+    self.drawables = [mans]
+    self.drawables.extend(missiles)
+    self.drawables.extend(villains)
+    self.drawables.extend(goals)
