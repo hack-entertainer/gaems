@@ -44,7 +44,7 @@ from utils import Point, Pen, Brush
 
 class Gauntlet(Game):
 
-  def __init__(self, map_width, map_height, max_goals=1, goal_target=1):
+  def __init__(self, map_width, map_height, max_goals=1, goal_target=1, num_spigots=1, max_active=1):
     self.um = datetime.now()
     """
 
@@ -100,7 +100,7 @@ class Gauntlet(Game):
       'hp': 4
     }
     spigots = []
-    for whatever in range(2):
+    for whatever in range(num_spigots):
       location = Point(
         randint(self.map_center.x - self.m_width, self.map_center.x + self.m_width),
         randint(self.map_center.y - self.m_height, self.map_center.y + self.m_height)
@@ -114,7 +114,7 @@ class Gauntlet(Game):
           spawn_type=Renemy,
           spawn_rate=timedelta(0, .5),
           spawn_args=spawn_args,
-          max_active=2
+          max_active=max_active
         )
       )
       self.spigots = spigots
@@ -368,4 +368,4 @@ class Gauntlet(Game):
 
 
 if __name__ == "__main__":
-  print(sys.exit(Gauntlet(map_height=650, map_width=650).main()))
+  print(sys.exit(Gauntlet(map_height=650, map_width=650, num_spigots=5, max_active=3).main()))
