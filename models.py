@@ -285,7 +285,7 @@ class EnemySpigot(Square):
   def spawn(self):
     self.total_spawned += 1
     self.last_spawn = datetime.now()
-    self.spawn_args['location'] = Point(self.spawn_loc[0], self.spawn_loc[1])
+    self.spawn_args['location'] = Point(self.location.x, self.location.y)
     return self.spawn_type(**self.spawn_args)
 
 
@@ -579,15 +579,15 @@ class TriangleMan(Game):
     mans = self.mans
 
     ## VILLAIN CREW ##
-
     villains = [enemy for enemy in self.enemies if enemy.hp > 0]
 
     # spawn
     while len(villains) < self.max_enemies:
-      villains.append(
-        Frenemy(18, GREEN, target=mans, power=0,
-                location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
+      frenemy = Frenemy(
+        18, GREEN, target=mans, power=.4, max_speed=.6,
+        location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height))
       )
+      villains.append(frenemy)
 
     for v in villains:
       v.act()
