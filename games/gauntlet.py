@@ -96,7 +96,7 @@ class Gauntlet(Game):
       'color': BLUE,
       'target': mans,
       'max_speed': .35,
-      'power': 0,
+      'power': .5,
       'hp': 4
     }
     spigots = []
@@ -324,9 +324,9 @@ class Gauntlet(Game):
     while len(goals) < self.max_goals and self.goals_achieved < self.goal_target:
       goals.append(
         Goal(18, HEATWAVE,
-               location=Point(
-                 randint(0, self.m_width),
-                 randint(0, self.m_height)))
+             location=Point(
+               randint(0, self.m_width),
+               randint(0, self.m_height)))
       )
 
     self.collisions()
@@ -368,4 +368,5 @@ class Gauntlet(Game):
 
 
 if __name__ == "__main__":
-  print(sys.exit(Gauntlet(map_height=650, map_width=650, num_spigots=5, max_active=3).main()))
+  print(
+    sys.exit(Gauntlet(map_height=650, map_width=650, max_goals=0, goal_target=0, num_spigots=6, max_active=4).main()))
