@@ -25,7 +25,7 @@ from models import TriangleMan
 
 
 def main():
-  map_width, map_height = 500, 500
+  map_width, map_height = 1000,1000
 
   # initialize surface and renderer
   SDL_Init(SDL_INIT_VIDEO)

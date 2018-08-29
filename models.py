@@ -288,7 +288,7 @@ class TriangleMan(Game):
     self.m_width, self.m_height = map_width, map_height
     self.map_center = Point(map_width / 2, map_height / 2)
     self.view_center = Point(self.map_center.x, self.map_center.y)
-    self.max_distance_from_view_center = map_height / 4
+    self.max_distance_from_view_center = map_height / 8
 
     # keyboard state
     self.keyboard = {}
@@ -313,6 +313,22 @@ class TriangleMan(Game):
     # villains
     self.max_enemies = max_enemies
     self.enemies = []
+
+  def adjust_view(self):
+    # adjust view center
+    v_center = self.view_center
+    mans = self.mans
+    # horizontal
+    if abs(mans.location.x - v_center.x) > self.max_distance_from_view_center:
+      if mans.location.x < v_center.x:
+        # mans to right
+        v_center.x = mans.location.x + self.max_distance_from_view_center
+      else:
+        # mans to left of view center
+        v_center.x = mans.location.x - self.max_distance_from_view_center
+
+    # vertical
+    # todo
 
   @classmethod
   def collision(cls, o1, o2):
@@ -479,10 +495,10 @@ class TriangleMan(Game):
     '''
     # self.brush.poly(Geometry.offset(self.mans.points, Point(0, 0)), self.mans.color)
 
-    objects = list(self.goals)
+    objects = [self.mans]
     objects.extend(self.bullets)
     objects.extend(self.enemies)
-    objects.append(self.mans)
+    objects.extend(self.goals)
 
     # for o in objects:
     #   self.brush.poly(o.points, o.color)
@@ -528,20 +544,7 @@ class TriangleMan(Game):
 
     mans.move()
 
-    # adjust view center
-    v_center = self.view_center
-    # horizontal
-    if abs(mans.location.x - v_center.x) > self.max_distance_from_view_center:
-      # mans to left of view center
-      v_center.x = mans.location.x - self.max_distance_from_view_center
-      if mans.location.x < v_center.x:
-        # mans to right
-        v_center.x = mans.location.x + self.max_distance_from_view_center
-
-    # print("mans: {} -- view center: {}".format(mans.location, self.view_center))
-
-    # vertical
-    # todo
+    self.adjust_view()
 
     # have the action follow the man
     # todo -- continue here
