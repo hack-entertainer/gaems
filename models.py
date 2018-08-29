@@ -1,7 +1,7 @@
 import random as rn
 
 from datetime import datetime, timedelta
-from math import sqrt, sin, cos, pi
+from math import sqrt, sin, cos, pi, inf
 
 from sdl2 import (
   SDLK_w,
@@ -214,15 +214,15 @@ class Bullet(Triangle):
     self.calc_points()
 
 
-class Enemy(Square):
-  def __init__(self, size, color, target, max_speed=.3, location=None, power=0, hp=1):
+class Frenemy(Square):
+  def __init__(self, size, color, target, max_speed=1, location=None, power=0, hp=1):
     """
     size -- int
     color -- RGB tuple good for sdl
     location -- Point()
     velocity -- tuple(['speed', 'direction as degrees of a circle'])
     """
-    super(Enemy, self).__init__(size, color, location=location)
+    super(Frenemy, self).__init__(size, color, location=location)
 
     self.hp = hp
     self.power = power
@@ -250,7 +250,43 @@ class Enemy(Square):
 
 
 class EnemySpigot(Square):
-  pass
+
+  def __init__(self, size, color, location, hp, spawn_type, spawn_rate, spawn_args, max_spawnable=inf):
+    """
+
+    :param size:
+    :param color:
+    :param location: Point()
+    :param hp: int
+    :param spawn_type: what type to spawn
+    :param spawn_args: parameters of spawn type
+    :param spawn_rate: how fast to spawn
+    :param max_spawnable: how many to spawn
+    """
+    self.size = size
+    self.color = color
+    self.location = location
+    self.hp = hp
+    self.spawn_rate = spawn_rate
+    self.spawn_type = spawn_type
+    self.spawn_args = spawn_args
+    self.spawn_loc = self.spawn_args['location']
+    self.max_spawnable = max_spawnable
+    self.last_spawn = datetime.now()
+
+    self.total_spawned = 0
+
+    self.calc_points()
+
+  def can_spawn(self):
+    return datetime.now() - self.last_spawn > self.spawn_rate and \
+           self.total_spawned <= self.max_spawnable
+
+  def spawn(self):
+    self.total_spawned += 1
+    self.last_spawn = datetime.now()
+    self.spawn_args['location'] = Point(self.spawn_loc[0], self.spawn_loc[1])
+    return self.spawn_type(**self.spawn_args)
 
 
 class Game:
@@ -549,8 +585,8 @@ class TriangleMan(Game):
     # spawn
     while len(villains) < self.max_enemies:
       villains.append(
-        Enemy(18, GREEN, target=mans, power=0,
-              location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
+        Frenemy(18, GREEN, target=mans, power=0,
+                location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
       )
 
     for v in villains:

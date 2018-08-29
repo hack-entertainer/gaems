@@ -38,13 +38,13 @@ from sdl2 import (
 
 from colors import *
 
-from models import Game, Enemy, Bullet, Square, Protagonist
-from utils import Point, Pen, Brush, Geometry
+from models import Game, Frenemy, Bullet, Square, Protagonist, EnemySpigot, Frenemy
+from utils import Point, Pen, Brush
 
 
 class Gauntlet(Game):
 
-  def __init__(self, map_width, map_height, max_goals=1, goal_target=1, max_enemies=1):
+  def __init__(self, map_width, map_height, max_goals=1, goal_target=1):
     self.um = datetime.now()
     """
 
@@ -78,7 +78,7 @@ class Gauntlet(Game):
 
     # todo -- initial config starting to get big
     # protagonist
-    mans = Protagonist(self.brush, 15, HEATWAVE, hp=5, location=Point(self.map_center.x, self.map_center.y))
+    mans = Protagonist(15, HEATWAVE, hp=5, location=Point(self.map_center.x, self.map_center.y))
     self.mans = mans
 
     # aiming; .2 second threshold
@@ -94,8 +94,20 @@ class Gauntlet(Game):
     self.goal_target = goal_target
 
     # villains
-    self.max_enemies = max_enemies
     self.enemies = []
+    spawn_args = {
+      'size': 20,
+      'color': BLUE,
+      'target': mans,
+      'max_speed': .3,
+      'location': (map_width / 4, map_height / 4),
+      'power': 1,
+      'hp': 4
+    }
+    self.spigots = [
+      EnemySpigot(30, BLACK, Point(map_width / 4, map_height / 4), 30, Frenemy, timedelta(0, .5), spawn_args),
+      EnemySpigot(30, BLACK, Point(map_width / 2, map_height / 2), 30, Frenemy, timedelta(0, .5), spawn_args)
+    ]
 
   def collisions(self):
     # todo -- convert into regions and do collisions on all items therein
@@ -118,6 +130,13 @@ class Gauntlet(Game):
       for bullet in self.bullets:
         if self.collision(bullet, enemy):
           enemy.hp -= bullet.power
+          bullet.power -= 1
+
+    for spigot in self.spigots:
+      for bullet in self.bullets:
+        if self.collision(bullet, spigot):
+          spigot.hp -= bullet.power
+          bullet.power -= 1
 
     # enemies and mans
     for enemy in enemies:
@@ -249,14 +268,13 @@ class Gauntlet(Game):
     ## VILLAIN CREW ##
 
     villains = [enemy for enemy in self.enemies if enemy.hp > 0]
+    spigots = [spig for spig in self.spigots if spig.hp > 0]
 
-    # spawn
-    while len(villains) < self.max_enemies:
-      villains.append(
-        Enemy(
-          self.brush, 18, GREEN, target=mans, power=0,
-          location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
-      )
+    for spigot in spigots:
+      if spigot.can_spawn():
+        villains.append(spigot.spawn())
+
+    self.spigots = spigots
 
     for v in villains:
       v.act()
@@ -278,24 +296,23 @@ class Gauntlet(Game):
 
     # have the action follow the man
     # todo -- continue here
-    if mans.firing:
+    if mans.firing and datetime.now() - mans.last_fire >= mans.fire_rate:
       # fire bullet at correct frequency
-      if datetime.now() - mans.last_fire >= mans.fire_rate:
-        missiles.append(Bullet(
-          self.brush, 25, RED, lifespan=timedelta(0, .5), location=Point(mans.location.x, mans.location.y),
-          velocity=(1.5, mans.aim)
-        ))
-        mans.last_fire = datetime.now()
+      missiles.append(Bullet(
+        25, RED, lifespan=timedelta(0, .5), power=2, location=Point(mans.location.x, mans.location.y),
+        velocity=(1.5, mans.aim)
+      ))
+      mans.last_fire = datetime.now()
 
     # delet exppired missiles
     for i in reversed(range(len(missiles))):
-      if datetime.now() - missiles[i].creation > missiles[i].lifespan:
+      if datetime.now() - missiles[i].creation > missiles[i].lifespan or missiles[i].power <= 0:
         missiles.pop(i)
 
     goals = self.goals
     while len(goals) < self.max_goals and self.goals_achieved < self.goal_target:
       goals.append(
-        Square(self.brush, 18, HEATWAVE,
+        Square(18, HEATWAVE,
                location=Point(
                  rn.randint(0, self.m_width),
                  rn.randint(0, self.m_height)))
@@ -308,6 +325,7 @@ class Gauntlet(Game):
     self.game_objects.extend(missiles)
     self.game_objects.extend(villains)
     self.game_objects.extend(goals)
+    self.game_objects.extend(self.spigots)
 
   def main(self):
     renderer = self.renderer
@@ -334,6 +352,7 @@ class Gauntlet(Game):
     SDL_DestroyWindow(self.window)
     SDL_DestroyRenderer(renderer)
     SDL_Quit()
+
 
 if __name__ == "__main__":
   print(sys.exit(Gauntlet(map_height=650, map_width=650).main()))
