@@ -37,7 +37,7 @@ def main():
   # main_loop
   event = SDL_Event()
 
-  game = TriangleMan(renderer, map_width, map_height, max_enemies=1, max_goals=2, goal_target=5)
+  game = TriangleMan(renderer, map_width, map_height, max_enemies=3, max_goals=15, goal_target=30)
 
   BKGRND = NIGHTFALL
 

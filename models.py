@@ -477,17 +477,21 @@ class TriangleMan(Game):
     '''
     draw game assets
     '''
-    self.brush.poly(Geometry.offset(self.mans.points, Point(0, 0)), self.mans.color)
+    # self.brush.poly(Geometry.offset(self.mans.points, Point(0, 0)), self.mans.color)
 
     objects = list(self.goals)
     objects.extend(self.bullets)
     objects.extend(self.enemies)
+    objects.append(self.mans)
 
     # for o in objects:
-    #   self.brush.poly(Geometry.offset(o.points, self.view_center), o.color)
+    #   self.brush.poly(o.points, o.color)
 
+    mc = self.map_center
+    vc = self.view_center
     for o in objects:
-      self.brush.poly(o.points, o.color)
+      points = [Point(p.x + (mc.x - vc.x), p.y) for p in o.points]
+      self.brush.poly(points, o.color)
 
   def update(self):
     '''
@@ -520,7 +524,6 @@ class TriangleMan(Game):
       missile.move()
 
     if datetime.now() - self.um > timedelta(0, .5):
-      print(mans.location)
       self.um = datetime.now()
 
     mans.move()
@@ -535,7 +538,7 @@ class TriangleMan(Game):
         # mans to right
         v_center.x = mans.location.x + self.max_distance_from_view_center
 
-    print("mans: {} -- view center: {}".format(mans.location, self.view_center))
+    # print("mans: {} -- view center: {}".format(mans.location, self.view_center))
 
     # vertical
     # todo
