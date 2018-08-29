@@ -38,7 +38,7 @@ from sdl2 import (
 
 from colors import *
 
-from models import Game, Renemy, Bullet, Square, Protagonist, EnemySpigot, Frenemy
+from models import Game, Renemy, Bullet, Goal, Protagonist, EnemySpigot, Frenemy
 from utils import Point, Pen, Brush
 
 
@@ -73,10 +73,6 @@ class Gauntlet(Game):
     self.view_center = Point(self.map_center.x, self.map_center.y)
     self.max_distance_from_view_center = map_height / 4
 
-    # keyboard state
-    self.keyboard = {}
-
-    # todo -- initial config starting to get big
     # protagonist
     mans = Protagonist(15, HEATWAVE, hp=5, location=Point(self.map_center.x, self.map_center.y))
     self.mans = mans
@@ -100,7 +96,7 @@ class Gauntlet(Game):
       'color': BLUE,
       'target': mans,
       'max_speed': .35,
-      'power': 1,
+      'power': 0,
       'hp': 4
     }
     spigots = []
@@ -327,7 +323,7 @@ class Gauntlet(Game):
     goals = self.goals
     while len(goals) < self.max_goals and self.goals_achieved < self.goal_target:
       goals.append(
-        Square(18, HEATWAVE,
+        Goal(18, HEATWAVE,
                location=Point(
                  randint(0, self.m_width),
                  randint(0, self.m_height)))

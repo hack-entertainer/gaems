@@ -112,6 +112,8 @@ class Square(GameObject):
 
     ]
 
+class Goal(Square):
+  pass
 
 class Triangle(GameObject):
   def __init__(self, size, color, location=None, x_velo=0, y_velo=0, max_velo=0):
@@ -280,7 +282,6 @@ class EnemySpigot(Square):
     self.spawn_rate = spawn_rate
     self.spawn_type = spawn_type
     self.spawn_args = spawn_args
-    self.spawn_args['spawner'] = self
     self.max_spawnable = max_spawnable
     self.last_spawn = datetime.now()
     self.max_active = max_active
@@ -300,6 +301,7 @@ class EnemySpigot(Square):
     self.currently_spawned += 1
     self.last_spawn = datetime.now()
     self.spawn_args['location'] = Point(self.location.x, self.location.y)
+    self.spawn_args['spawner'] = self
     return self.spawn_type(**self.spawn_args)
 
 
@@ -307,6 +309,9 @@ class Game:
   def __init__(self):
     # game on
     self.ongoing = True
+
+    # keyboard state
+    self.keyboard = {}
 
   def __repr__(self):
     return "It's a meee! WaAAAAaAAaAAaaa!"
