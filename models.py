@@ -318,17 +318,25 @@ class TriangleMan(Game):
     # adjust view center
     v_center = self.view_center
     mans = self.mans
+    max_distance = self.max_distance_from_view_center
+
     # horizontal
-    if abs(mans.location.x - v_center.x) > self.max_distance_from_view_center:
+    if abs(mans.location.x - v_center.x) > max_distance:
       if mans.location.x < v_center.x:
         # mans to right
-        v_center.x = mans.location.x + self.max_distance_from_view_center
+        v_center.x = mans.location.x + max_distance
       else:
         # mans to left of view center
-        v_center.x = mans.location.x - self.max_distance_from_view_center
+        v_center.x = mans.location.x - max_distance
 
     # vertical
-    # todo
+    if abs(mans.location.y - v_center.y) > max_distance:
+      if mans.location.y < v_center.y:
+        # mans to right
+        v_center.y = mans.location.y + max_distance
+      else:
+        # mans to left of view center
+        v_center.y = mans.location.y - max_distance
 
   @classmethod
   def collision(cls, o1, o2):
@@ -506,7 +514,7 @@ class TriangleMan(Game):
     mc = self.map_center
     vc = self.view_center
     for o in objects:
-      points = [Point(p.x + (mc.x - vc.x), p.y) for p in o.points]
+      points = [Point(p.x + (mc.x - vc.x), p.y + (mc.y - vc.y)) for p in o.points]
       self.brush.poly(points, o.color)
 
   def update(self):
