@@ -249,9 +249,19 @@ class Frenemy(Square):
     self.velocity = self.max_speed, direction
 
 
+class Renemy(Frenemy):
+  """
+  enemy aware of its spigot
+  """
+
+  def __init__(self, size, color, target, spawner, max_speed=1, location=None, power=0, hp=1):
+    super(Renemy, self).__init__(size, color, target, max_speed=max_speed, location=location, power=power, hp=hp)
+    self.spawner = spawner
+
+
 class EnemySpigot(Square):
 
-  def __init__(self, size, color, location, hp, spawn_type, spawn_rate, spawn_args, max_spawnable=inf):
+  def __init__(self, size, color, location, hp, spawn_type, spawn_rate, spawn_args, max_active=1, max_spawnable=inf):
     """
 
     :param size:
@@ -270,20 +280,24 @@ class EnemySpigot(Square):
     self.spawn_rate = spawn_rate
     self.spawn_type = spawn_type
     self.spawn_args = spawn_args
-    self.spawn_loc = self.spawn_args['location']
+    self.spawn_args['spawner'] = self
     self.max_spawnable = max_spawnable
     self.last_spawn = datetime.now()
+    self.max_active = max_active
 
     self.total_spawned = 0
+    self.currently_spawned = 0
 
     self.calc_points()
 
   def can_spawn(self):
     return datetime.now() - self.last_spawn > self.spawn_rate and \
-           self.total_spawned <= self.max_spawnable
+           self.total_spawned <= self.max_spawnable and \
+           self.currently_spawned < self.max_active
 
   def spawn(self):
     self.total_spawned += 1
+    self.currently_spawned += 1
     self.last_spawn = datetime.now()
     self.spawn_args['location'] = Point(self.location.x, self.location.y)
     return self.spawn_type(**self.spawn_args)
@@ -344,7 +358,7 @@ class Game:
     '''
     mc = self.map_center
     vc = self.view_center
-    for o in self.game_objects:
+    for o in self.drawables:
       # adjust drawing position to account or viewport position
       points = [Point(p.x + (mc.x - vc.x), p.y + (mc.y - vc.y)) for p in o.points]
       self.brush.poly(points, o.color)

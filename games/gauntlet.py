@@ -1,9 +1,9 @@
 import ctypes
-import random as rn
 import sys
 
 from datetime import datetime, timedelta
 from math import pi
+from random import randint
 
 from sdl2 import (
   SDL_Init,
@@ -38,7 +38,7 @@ from sdl2 import (
 
 from colors import *
 
-from models import Game, Frenemy, Bullet, Square, Protagonist, EnemySpigot, Frenemy
+from models import Game, Renemy, Bullet, Square, Protagonist, EnemySpigot, Frenemy
 from utils import Point, Pen, Brush
 
 
@@ -99,15 +99,29 @@ class Gauntlet(Game):
       'size': 20,
       'color': BLUE,
       'target': mans,
-      'max_speed': .3,
-      'location': (map_width / 4, map_height / 4),
+      'max_speed': .35,
       'power': 1,
       'hp': 4
     }
-    self.spigots = [
-      EnemySpigot(30, BLACK, Point(map_width / 4, map_height / 4), 30, Frenemy, timedelta(0, .5), spawn_args),
-      EnemySpigot(30, BLACK, Point(map_width / 2, map_height / 2), 30, Frenemy, timedelta(0, .5), spawn_args)
-    ]
+    spigots = []
+    for whatever in range(2):
+      location = Point(
+        randint(self.map_center.x - self.m_width, self.map_center.x + self.m_width),
+        randint(self.map_center.y - self.m_height, self.map_center.y + self.m_height)
+      )
+      spigots.append(
+        EnemySpigot(
+          size=30,
+          color=BLACK,
+          location=location,
+          hp=15,
+          spawn_type=Renemy,
+          spawn_rate=timedelta(0, .5),
+          spawn_args=spawn_args,
+          max_active=2
+        )
+      )
+      self.spigots = spigots
 
   def collisions(self):
     # todo -- convert into regions and do collisions on all items therein
@@ -121,7 +135,7 @@ class Gauntlet(Game):
         goals.pop(t)
         self.goals_achieved += 1
 
-    if len(goals) is 0:
+    if len(self.spigots) == 0 and len(self.goals) == 0:
       self.ongoing = False
 
     # bullets and enemies
@@ -268,13 +282,14 @@ class Gauntlet(Game):
     ## VILLAIN CREW ##
 
     villains = [enemy for enemy in self.enemies if enemy.hp > 0]
+    for dead_villain in [enemy for enemy in self.enemies if enemy.hp <= 0]:
+      dead_villain.spawner.currently_spawned -= 1
+
     spigots = [spig for spig in self.spigots if spig.hp > 0]
 
     for spigot in spigots:
       if spigot.can_spawn():
         villains.append(spigot.spawn())
-
-    self.spigots = spigots
 
     for v in villains:
       v.act()
@@ -314,18 +329,20 @@ class Gauntlet(Game):
       goals.append(
         Square(18, HEATWAVE,
                location=Point(
-                 rn.randint(0, self.m_width),
-                 rn.randint(0, self.m_height)))
+                 randint(0, self.m_width),
+                 randint(0, self.m_height)))
       )
 
     self.collisions()
 
     # update list of game objects
-    self.game_objects = [mans]
-    self.game_objects.extend(missiles)
-    self.game_objects.extend(villains)
-    self.game_objects.extend(goals)
-    self.game_objects.extend(self.spigots)
+    self.spigots = spigots
+
+    self.drawables = [mans]
+    self.drawables.extend(missiles)
+    self.drawables.extend(villains)
+    self.drawables.extend(goals)
+    self.drawables.extend(spigots)
 
   def main(self):
     renderer = self.renderer
