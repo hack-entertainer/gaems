@@ -257,8 +257,29 @@ class Enemy(Square):
 
 
 class Game:
+  def __init__(self):
+    # game on
+    self.ongoing = True
+
   def __repr__(self):
-    print("It's a meee! WaAAAAaAAaAAaaa!")
+    return "It's a meee! WaAAAAaAAaAAaaa!"
+
+  @classmethod
+  def collision(cls, o1, o2):
+    '''
+
+    :param o1: a game object
+    :param o2: another game object
+    :return: True if they collide
+
+    For now, just use Euclidean distance between spheres to determine collision.
+    TODO -- implement SAT but mayyyybe bake your own simple one based on testing each side
+    TODO -- move into Geometry class -- eventually implement/import physics and *gasp* chemistry!!?
+    '''
+
+    return o1.size + o2.size >= sqrt(
+      (o1.location.x - o2.location.x) ** 2 + (o1.location.y - o2.location.y) ** 2
+    )
 
 
 class TriangleMan(Game):
@@ -279,7 +300,7 @@ class TriangleMan(Game):
     :param max_enemies: 
     """
 
-    self.ongoing = True
+    super(TriangleMan, self).__init__()
 
     # graephics
     self.brush = Brush(renderer)
@@ -337,23 +358,6 @@ class TriangleMan(Game):
       else:
         # mans to left of view center
         v_center.y = mans.location.y - max_distance
-
-  @classmethod
-  def collision(cls, o1, o2):
-    '''
-
-    :param o1: a game object
-    :param o2: another game object
-    :return: True if they collide
-
-    For now, just use Euclidean distance between spheres to determine collision.
-    TODO -- implement SAT but mayyyybe bake your own simple one based on testing each side
-    TODO -- move into Geometry class -- eventually implement/import physics and *gasp* chemistry!!?
-    '''
-
-    return o1.size + o2.size >= sqrt(
-      (o1.location.x - o2.location.x) ** 2 + (o1.location.y - o2.location.y) ** 2
-    )
 
   def collisions(self):
     # todo -- convert into regions and do collisions on all items therein
