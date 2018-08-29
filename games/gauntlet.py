@@ -311,7 +311,6 @@ class Gauntlet(Game):
 
   def main(self):
     renderer = self.renderer
-    # main_loop
     event = SDL_Event()
 
     BKGRND = NIGHTFALL
@@ -336,6 +335,5 @@ class Gauntlet(Game):
     SDL_DestroyRenderer(renderer)
     SDL_Quit()
 
-
 if __name__ == "__main__":
-  print(sys.exit(Gauntlet(map_height=600, map_width=600).main()))
+  print(sys.exit(Gauntlet(map_height=650, map_width=650).main()))

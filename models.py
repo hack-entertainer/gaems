@@ -27,15 +27,12 @@ class GameObject:
   repository for generic object attributes
   '''
 
-  # todo remove brush from game objects
-  def __init__(self, brush, size, color, location=None):
+  def __init__(self, size, color, location=None):
     """
-    brush -- Brush()
     size -- int
     color -- RGB tuple good for sdl
     location -- Point()
     """
-    self.brush = brush
     self.size = size
     self.color = color
     self.location = location
@@ -93,14 +90,13 @@ class Square(GameObject):
   a square
   '''
 
-  def __init__(self, brush, size, color, location=None):
+  def __init__(self, size, color, location=None):
     """
-    brush -- Brush()
     size -- int
     color -- RGB tuple good for sdl
     location -- Point()
     """
-    super(Square, self).__init__(brush, size, color, location=location)
+    super(Square, self).__init__(size, color, location=location)
     self.calc_points()
 
   def calc_points(self):
@@ -118,14 +114,13 @@ class Square(GameObject):
 
 
 class Triangle(GameObject):
-  def __init__(self, brush, size, color, location=None, x_velo=0, y_velo=0, max_velo=0):
+  def __init__(self, size, color, location=None, x_velo=0, y_velo=0, max_velo=0):
     """
-    brush -- Brush()
     size -- int
     color -- RGB tuple good for sdl
     location -- Point()
     """
-    super(Triangle, self).__init__(brush, size, color, location=location)
+    super(Triangle, self).__init__(size, color, location=location)
 
     # for movement
     self.x_velo = x_velo
@@ -161,14 +156,13 @@ class Protagonist(Triangle):
 
   '''
 
-  def __init__(self, brush, size, color, hp=1, location=None, x_velo=0, y_velo=0, max_velo=0):
+  def __init__(self, size, color, hp=1, location=None, x_velo=0, y_velo=0, max_velo=0):
     """
-    brush -- Brush()
     size -- int
     color -- RGB tuple good for sdl
     location -- Point()
     """
-    super(Protagonist, self).__init__(brush, size, color, location=location)
+    super(Protagonist, self).__init__(size, color, location=location)
 
     self.hp = hp
 
@@ -200,7 +194,7 @@ class Bullet(Triangle):
 
   '''
 
-  def __init__(self, brush, size, color, location=None, power=1, lifespan=timedelta(0, .25), velocity=(1, 90)):
+  def __init__(self, size, color, location=None, power=1, lifespan=timedelta(0, .25), velocity=(1, 90)):
     """
     brush -- Brush()
     size -- int
@@ -208,7 +202,7 @@ class Bullet(Triangle):
     location -- Point()
     velocity -- tuple(['speed', 'direction as degrees of a circle'])
     """
-    super(Bullet, self).__init__(brush, size, color, location=location)
+    super(Bullet, self).__init__(size, color, location=location)
 
     self.power = power
     self.lifespan = lifespan
@@ -221,15 +215,14 @@ class Bullet(Triangle):
 
 
 class Enemy(Square):
-  def __init__(self, brush, size, color, target, max_speed=.3, location=None, power=0, hp=1):
+  def __init__(self, size, color, target, max_speed=.3, location=None, power=0, hp=1):
     """
-    brush -- Brush()
     size -- int
     color -- RGB tuple good for sdl
     location -- Point()
     velocity -- tuple(['speed', 'direction as degrees of a circle'])
     """
-    super(Enemy, self).__init__(brush, size, color, location=location)
+    super(Enemy, self).__init__(size, color, location=location)
 
     self.hp = hp
     self.power = power
@@ -254,6 +247,10 @@ class Enemy(Square):
   def set_velocity(self):
     direction = Geometry.angle_between(self.location, self.target.location)
     self.velocity = self.max_speed, direction
+
+
+class EnemySpigot(Square):
+  pass
 
 
 class Game:
@@ -351,7 +348,7 @@ class TriangleMan(Game):
 
     # todo -- initial config starting to get big
     # protagonist
-    mans = Protagonist(self.brush, 15, HEATWAVE, hp=5, location=Point(self.map_center.x, self.map_center.y))
+    mans = Protagonist(15, HEATWAVE, hp=5, location=Point(self.map_center.x, self.map_center.y))
     self.mans = mans
 
     # aiming; .2 second threshold
@@ -552,9 +549,8 @@ class TriangleMan(Game):
     # spawn
     while len(villains) < self.max_enemies:
       villains.append(
-        Enemy(
-          self.brush, 18, GREEN, target=mans, power=0,
-          location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
+        Enemy(18, GREEN, target=mans, power=0,
+              location=Point(rn.randint(0, self.m_width), rn.randint(0, self.m_height)))
       )
 
     for v in villains:
@@ -581,7 +577,7 @@ class TriangleMan(Game):
       # fire bullet at correct frequency
       if datetime.now() - mans.last_fire >= mans.fire_rate:
         missiles.append(Bullet(
-          self.brush, 25, RED, lifespan=timedelta(0, .5), location=Point(mans.location.x, mans.location.y),
+          25, RED, lifespan=timedelta(0, .5), location=Point(mans.location.x, mans.location.y),
           velocity=(1.5, mans.aim)
         ))
         mans.last_fire = datetime.now()
@@ -594,7 +590,7 @@ class TriangleMan(Game):
     goals = self.goals
     while len(goals) < self.max_goals and self.goals_achieved < self.goal_target:
       goals.append(
-        Square(self.brush, 18, HEATWAVE,
+        Square(18, HEATWAVE,
                location=Point(
                  rn.randint(0, self.m_width),
                  rn.randint(0, self.m_height)))
