@@ -97,8 +97,8 @@ class Geometry:
     y = p2.y - p1.y
 
     # angle is completely vertical
-    if x is 0:
-      if y is 0:
+    if x == 0:
+      if y == 0:
         # same location
         return 0
       elif y > 0:
